@@ -6,5 +6,13 @@ target/
 spring-shell.log
 !**/src/main/**/target/
 !**/src/test/**/target/
+/build/
+/.gradle/
+/gradle/
+/.kotlin/
 /hw01/.gradle/
 /hw01/gradle/
+/hw01/.kotlin/
+/hw01/build/
+/gradlew
+/gradlew.bat
