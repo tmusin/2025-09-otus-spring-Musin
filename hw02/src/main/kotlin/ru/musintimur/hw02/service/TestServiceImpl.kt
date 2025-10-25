@@ -36,8 +36,9 @@ class TestServiceImpl(
             ioService.printFormattedLine("%d. %s%n", index.inc(), question.text)
             var correctAnswerNumber = 1
             question.answers.forEachIndexed { answerIndex, answer ->
-                ioService.printFormattedLine("\t%d. %s%n", answerIndex.inc(), answer.text)
-                if (answer.isCorrect) correctAnswerNumber = answerIndex.inc()
+                val answerNumber = answerIndex.inc()
+                ioService.printFormattedLine("\t%d. %s%n", answerNumber, answer.text)
+                if (answer.isCorrect) correctAnswerNumber = answerNumber
             }
             val studentAnswer =
                 ioService.readIntFromRangeWithPrompt(

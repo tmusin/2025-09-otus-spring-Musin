@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.PropertySource
 import ru.musintimur.hw02.dao.CsvQuestionDao
 import ru.musintimur.hw02.dao.QuestionDao
-import java.io.InputStream
-import java.io.PrintStream
 
 @Configuration
 @PropertySource("classpath:application.properties")
@@ -22,10 +20,4 @@ open class AppConfig {
         @Value("\${test.rightAnswersCountToPass}") rightAnswersCountToPass: Int,
         @Value("\${test.fileName}") testFileName: String,
     ): AppProperties = AppProperties(rightAnswersCountToPass, testFileName)
-
-    @Bean
-    open fun inputStream(): InputStream = System.`in`
-
-    @Bean
-    open fun outputStream(): PrintStream = System.out
 }

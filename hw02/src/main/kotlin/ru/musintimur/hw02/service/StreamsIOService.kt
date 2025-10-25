@@ -1,20 +1,16 @@
 package ru.musintimur.hw02.service
 
 import org.springframework.stereotype.Service
-import java.io.InputStream
-import java.io.PrintStream
 import java.util.Scanner
 
 @Service
-class StreamsIOService(
-    private val printStream: PrintStream,
-    inputStream: InputStream,
-) : IOService {
+class StreamsIOService : IOService {
     companion object {
         private const val MAX_ATTEMPTS = 10
     }
 
-    private val scanner = Scanner(inputStream)
+    private val printStream = System.out
+    private val scanner = Scanner(System.`in`)
 
     override fun printLine(s: String) {
         printStream.println(s)
