@@ -10,7 +10,7 @@ import ru.musintimur.hw02.domain.Answer
 import ru.musintimur.hw02.domain.Question
 import ru.musintimur.hw02.domain.Student
 
-class TestServiceImplTest() {
+class TestServiceImplTest {
     private val ioService: IOService = mock()
     private val questionDao: QuestionDao = mock()
     private val testService: TestService = TestServiceImpl(ioService, questionDao)

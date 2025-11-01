@@ -23,22 +23,22 @@ class CommonHwTest {
 
     @Test
     fun shouldNotContainConfigurationAnnotationAboveItSelf() {
-        Assertions.assertThat(AppProperties::class.java.isAnnotationPresent(Configuration::class.java))
+        Assertions
+            .assertThat(AppProperties::class.java.isAnnotationPresent(Configuration::class.java))
             .withFailMessage(
                 "Класс свойств не является конфигурацией т.к. " +
                     "конфигурация для создания бинов, а тут просто компонент группирующий свойства приложения",
-            )
-            .isFalse()
+            ).isFalse()
     }
 
     @Test
     fun shouldNotContainPropertySourceAnnotationAboveItSelf() {
-        Assertions.assertThat(AppProperties::class.java.isAnnotationPresent(PropertySource::class.java))
+        Assertions
+            .assertThat(AppProperties::class.java.isAnnotationPresent(PropertySource::class.java))
             .withFailMessage(
                 "Аннотацию @PropertySource лучше вешать над конфигурацией, " +
                     "а класс свойств ей не является",
-            )
-            .isFalse()
+            ).isFalse()
     }
 
     @Test
@@ -53,7 +53,8 @@ class CommonHwTest {
                 val isConfiguration = annotationMetaData.hasAnnotation(CONFIGURATION_ANNOTATION_NAME)
                 val clazz = getBeanClassByName(metaData.className)
                 val classContainsFieldInjectedDependenciesOrProperties =
-                    Arrays.stream<Field>(clazz.getDeclaredFields())
+                    Arrays
+                        .stream<Field>(clazz.getDeclaredFields())
                         .anyMatch { f: Field -> f.isAnnotationPresent(Autowired::class.java) || f.isAnnotationPresent(Value::class.java) }
                 !isTest && !isInterface && !isConfiguration && classContainsFieldInjectedDependenciesOrProperties
             },
@@ -63,14 +64,16 @@ class CommonHwTest {
             provider.findCandidateComponents("ru.musintimur.hw02")
 
         val classesNames =
-            classesContainsFieldInjectedDependenciesOrProperties.stream()
-                .map<String?> { obj: BeanDefinition -> obj.beanClassName }.collect(Collectors.joining("%n"))
-        Assertions.assertThat<BeanDefinition?>(classesContainsFieldInjectedDependenciesOrProperties)
+            classesContainsFieldInjectedDependenciesOrProperties
+                .stream()
+                .map<String?> { obj: BeanDefinition -> obj.beanClassName }
+                .collect(Collectors.joining("%n"))
+        Assertions
+            .assertThat<BeanDefinition?>(classesContainsFieldInjectedDependenciesOrProperties)
             .withFailMessage(
                 "На курсе все внедрение рекомендовано осуществлять через конструктор (" +
                     "в т.ч. @Value). Следующие классы нарушают это правило: \n$classesNames",
-            )
-            .isEmpty()
+            ).isEmpty()
     }
 
     private fun getBeanClassByName(beanClassName: String?): Class<*> {

@@ -7,7 +7,9 @@ import ru.musintimur.hw02.domain.Question
 import ru.musintimur.hw02.exceptions.QuestionReadException
 import java.io.InputStreamReader
 
-class CsvQuestionDao(private val fileNameProvider: TestFileNameProvider) : QuestionDao {
+class CsvQuestionDao(
+    private val fileNameProvider: TestFileNameProvider,
+) : QuestionDao {
     override fun findAll(): List<Question> =
         runCatching {
             val inputStream =

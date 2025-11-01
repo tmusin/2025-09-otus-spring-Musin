@@ -6,7 +6,7 @@ import ru.musintimur.hw01.domain.Answer
 import ru.musintimur.hw01.domain.Question
 import java.util.ArrayList
 
-class QuestionDto() {
+class QuestionDto {
     @CsvBindByPosition(position = 0)
     private var text: String = ""
 
