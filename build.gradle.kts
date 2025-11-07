@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm") version "2.2.20" apply false
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0" apply false
+    id("org.jlleitschuh.gradle.ktlint") version "13.1.0" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
 }
 
@@ -20,7 +20,7 @@ subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-        version.set("1.0.1")
+        version.set("1.5.0")
         android.set(false)
         outputToConsole.set(true)
         ignoreFailures.set(false)
