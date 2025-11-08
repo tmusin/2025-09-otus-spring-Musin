@@ -1,0 +1,10 @@
+test:
+  rightAnswersCountToPass: 2
+  locale: en-US
+  fileNameByLocaleTag:
+    en-US: test-questions.csv
+
+spring:
+  shell:
+    interactive:
+      enabled: false
