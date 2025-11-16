@@ -12,7 +12,7 @@ import ru.musintimur.hw04.domain.Answer
 import ru.musintimur.hw04.domain.Question
 import ru.musintimur.hw04.domain.Student
 
-@SpringBootTest
+@SpringBootTest(classes = [TestServiceImpl::class])
 class TestServiceImplTest {
     @MockitoBean
     private lateinit var ioService: LocalizedIOService

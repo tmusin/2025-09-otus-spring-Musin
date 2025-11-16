@@ -9,7 +9,7 @@ class TestRunnerServiceImpl(
     private val resultService: ResultService,
 ) : TestRunnerService {
     override fun run() {
-        val student = studentService.determineCurrentStudent()
+        val student = studentService.getCurrentStudent()
         val testResult = testService.executeTestFor(student)
         resultService.showResult(testResult)
     }

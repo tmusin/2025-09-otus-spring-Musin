@@ -3,18 +3,25 @@ package ru.musintimur.hw04.dao
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import ru.musintimur.hw04.config.TestFileNameProvider
 import ru.musintimur.hw04.exceptions.QuestionReadException
 
-@SpringBootTest
+@SpringBootTest(classes = [CsvQuestionDao::class])
 class CsvQuestionDaoTest {
     @Autowired
     private lateinit var questionDao: QuestionDao
 
+    @MockitoBean
+    private lateinit var fileNameProvider: TestFileNameProvider
+
     @Test
     fun `findAll should load questions from existing CSV resource`() {
+        whenever(fileNameProvider.testFileName).thenReturn("test-questions.csv")
+
         val questions = questionDao.findAll()
 
         assertThat(questions).isNotEmpty
@@ -34,14 +41,9 @@ class CsvQuestionDaoTest {
     @Test
     fun `findAll should throw QuestionReadException when resource does not exist`() {
         val invalidFileName = "questions123.csv"
+        whenever(fileNameProvider.testFileName).thenReturn(invalidFileName)
 
-        val fileNameProvider =
-            object : TestFileNameProvider {
-                override val testFileName = invalidFileName
-            }
-        val dao = CsvQuestionDao(fileNameProvider)
-
-        val exception = assertThrows<QuestionReadException> { dao.findAll() }
+        val exception = assertThrows<QuestionReadException> { questionDao.findAll() }
 
         assert(exception.message == "File $invalidFileName not found")
     }
