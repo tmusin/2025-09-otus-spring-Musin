@@ -24,13 +24,13 @@ import jakarta.persistence.Table
 data class Book(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long = 0,
     @Column(name = "title", nullable = false)
-    val title: String,
+    var title: String,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
-    val author: Author,
+    var author: Author,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "genre_id")
-    val genre: Genre,
+    var genre: Genre,
 )

@@ -1,6 +1,5 @@
 package ru.musintimur.hw06.repositories
 
-import jakarta.persistence.EntityGraph
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.stereotype.Repository
@@ -17,16 +16,13 @@ open class JpaCommentRepository(
             .find(Comment::class.java, id)
             .let { Optional.ofNullable(it) }
 
-    override fun findAllByBookId(bookId: Long): List<Comment> {
-        val entityGraph = entityManager.getEntityGraph("comment-with-book-details") as EntityGraph<Comment>
-        return entityManager
+    override fun findAllByBookId(bookId: Long): List<Comment> =
+        entityManager
             .createQuery(
                 "select c from Comment c where c.book.id = :bookId",
                 Comment::class.java,
             ).setParameter("bookId", bookId)
-            .setHint("jakarta.persistence.fetchgraph", entityGraph)
             .resultList
-    }
 
     override fun save(comment: Comment): Comment =
         if (comment.id == 0L) {

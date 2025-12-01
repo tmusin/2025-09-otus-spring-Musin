@@ -46,9 +46,10 @@ open class BookServiceImpl(
         authorId: Long,
         genreId: Long,
     ): Book {
-        bookRepository
-            .findById(id)
-            .orElseThrow { EntityNotFoundException("Book with id $id not found") }
+        val book =
+            bookRepository
+                .findById(id)
+                .orElseThrow { EntityNotFoundException("Book with id $id not found") }
         val author =
             authorRepository
                 .findById(authorId)
@@ -58,7 +59,11 @@ open class BookServiceImpl(
                 .findById(genreId)
                 .orElseThrow { EntityNotFoundException("Genre with id $genreId not found") }
 
-        val book = Book(id = id, title = title, author = author, genre = genre)
+        book.apply {
+            this.title = title
+            this.author = author
+            this.genre = genre
+        }
         return bookRepository.save(book)
     }
 

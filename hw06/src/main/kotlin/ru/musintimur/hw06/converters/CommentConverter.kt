@@ -5,5 +5,5 @@ import ru.musintimur.hw06.models.Comment
 
 @Component
 class CommentConverter {
-    fun commentToString(comment: Comment): String = "Id: ${comment.id}, FillName (${comment.text})"
+    fun commentToString(comment: Comment): String = "Id: ${comment.id}, Text: ${comment.text}"
 }

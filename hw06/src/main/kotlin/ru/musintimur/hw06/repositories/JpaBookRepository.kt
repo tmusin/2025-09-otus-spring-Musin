@@ -37,7 +37,7 @@ open class JpaBookRepository(
         }
 
     override fun deleteById(id: Long) {
-        val book = entityManager.find(Book::class.java, id)
+        val book = entityManager.getReference(Book::class.java, id)
         if (book != null) {
             entityManager.remove(book)
         }

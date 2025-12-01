@@ -12,7 +12,7 @@ import jakarta.persistence.Table
 data class Genre(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long = 0,
     @Column(name = "name", nullable = false)
-    val name: String,
+    var name: String,
 )

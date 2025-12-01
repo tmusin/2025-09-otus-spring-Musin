@@ -1,14 +1,15 @@
 package ru.musintimur.hw06.repositories
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
 import ru.musintimur.hw06.models.Author
-import kotlin.jvm.optionals.getOrNull
 
 @DataJpaTest
 @Import(JpaAuthorRepository::class)
@@ -17,41 +18,41 @@ class JpaAuthorRepositoryTest {
     @Autowired
     private lateinit var repositoryJpa: JpaAuthorRepository
 
-    @Autowired
-    private lateinit var em: TestEntityManager
+    private lateinit var dbAuthors: List<Author>
 
-    @Test
-    @DisplayName("должен загружать список всех авторов")
-    fun shouldReturnCorrectAuthorsList() {
-        val authors = repositoryJpa.findAll()
-        assertThat(authors)
-            .isNotNull
-            .hasSize(3)
-            .allMatch { it.id > 0 }
-            .allMatch { it.fullName.isNotBlank() }
+    @BeforeEach
+    fun setUp() {
+        dbAuthors = getDbAuthors()
     }
 
-    @Test
     @DisplayName("должен загружать автора по id")
-    fun shouldReturnCorrectAuthorById() {
-        val expectedAuthor = em.find(Author::class.java, 1L)
-        val actualAuthor =
-            repositoryJpa
-                .findById(expectedAuthor.id)
-                .getOrNull()
+    @ParameterizedTest
+    @MethodSource("getAuthorsFromDb")
+    fun shouldReturnCorrectAuthorById(expectedAuthor: Author) {
+        val actualAuthor = repositoryJpa.findById(expectedAuthor.id)
+
         assertThat(actualAuthor)
-            .isNotNull
+            .isPresent
+            .get()
             .usingRecursiveComparison()
             .isEqualTo(expectedAuthor)
     }
 
+    @DisplayName("должен загружать список всех авторов")
     @Test
-    @DisplayName("должен возвращать null если автор не найден")
-    fun shouldReturnNullIfAuthorNotFound() {
-        val author =
-            repositoryJpa
-                .findById(999L)
-                .getOrNull()
-        assertThat(author).isNull()
+    fun shouldReturnCorrectAuthorsList() {
+        val actualAuthors = repositoryJpa.findAll()
+        val expectedAuthors = dbAuthors
+
+        assertThat(actualAuthors)
+            .usingRecursiveFieldByFieldElementComparator()
+            .containsExactlyInAnyOrderElementsOf(expectedAuthors)
+    }
+
+    companion object {
+        private fun getDbAuthors(): List<Author> = (1L..3L).map { Author(id = it, fullName = "Author_$it") }
+
+        @JvmStatic
+        fun getAuthorsFromDb(): List<Author> = getDbAuthors()
     }
 }

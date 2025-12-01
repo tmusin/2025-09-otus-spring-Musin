@@ -1,16 +1,19 @@
-
 package ru.musintimur.hw06.repositories
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
+import ru.musintimur.hw06.models.Author
 import ru.musintimur.hw06.models.Book
 import ru.musintimur.hw06.models.Comment
-import kotlin.jvm.optionals.getOrNull
+import ru.musintimur.hw06.models.Genre
 
 @DataJpaTest
 @Import(JpaCommentRepository::class)
@@ -22,98 +25,156 @@ class JpaCommentRepositoryTest {
     @Autowired
     private lateinit var em: TestEntityManager
 
-    @Test
+    private lateinit var dbBooks: List<Book>
+    private lateinit var dbComments: List<Comment>
+
+    @BeforeEach
+    fun setUp() {
+        val dbAuthors = getDbAuthors()
+        val dbGenres = getDbGenres()
+        dbBooks = getDbBooks(dbAuthors, dbGenres)
+        dbComments = getDbComments(dbBooks)
+    }
+
     @DisplayName("должен загружать комментарий по id")
-    fun shouldReturnCorrectCommentById() {
-        val expectedComment = em.find(Comment::class.java, 1L)
-        val actualComment =
-            repositoryJpa
-                .findById(expectedComment.id)
-                .orElseThrow()
+    @ParameterizedTest
+    @MethodSource("getDbComments")
+    fun shouldReturnCorrectCommentById(expectedComment: Comment) {
+        val actualComment = repositoryJpa.findById(expectedComment.id)
 
         assertThat(actualComment)
-            .isNotNull
-            .matches { it.id > 0 }
-            .matches { it.text.isNotBlank() }
+            .isPresent
+            .get()
+            .usingRecursiveComparison()
+            .isEqualTo(expectedComment)
     }
 
-    @Test
     @DisplayName("должен загружать комментарии по id книги")
+    @Test
     fun shouldReturnCorrectCommentsByBookId() {
-        val comments = repositoryJpa.findAllByBookId(1L)
+        val bookId = 1L
+        val expectedComments = dbComments.filter { it.book.id == bookId }
+        val actualComments = repositoryJpa.findAllByBookId(bookId)
 
-        assertThat(comments)
-            .isNotNull
-            .hasSize(2)
-            .allMatch { it.id > 0 }
-            .allMatch { it.text.isNotBlank() }
+        assertThat(actualComments)
+            .usingRecursiveFieldByFieldElementComparator()
+            .containsExactlyInAnyOrderElementsOf(expectedComments)
     }
 
-    @Test
     @DisplayName("должен сохранять новый комментарий")
+    @Test
     fun shouldSaveNewComment() {
-        val book = em.find(Book::class.java, 1L)
-        val newCommentText = "New comment text"
-        val newComment =
+        val expectedComment =
             Comment(
-                text = newCommentText,
-                book = book,
+                text = "New comment text",
+                book = dbBooks[0],
             )
 
-        val savedComment = repositoryJpa.save(newComment)
-        assertThat(savedComment.id).isGreaterThan(0)
+        val returnedComment = repositoryJpa.save(expectedComment)
 
-        val actualComment = em.find(Comment::class.java, savedComment.id)
-        assertThat(actualComment)
+        assertThat(returnedComment)
             .isNotNull
-            .matches { it.text == newCommentText }
+            .matches { it.id > 0 }
+            .usingRecursiveComparison()
+            .ignoringExpectedNullFields()
+            .isEqualTo(expectedComment)
+
+        val actualComment = em.find(Comment::class.java, returnedComment.id)
+        assertThat(actualComment)
+            .usingRecursiveComparison()
+            .isEqualTo(returnedComment)
     }
 
+    @DisplayName("должен сохранять измененный комментарий")
     @Test
-    @DisplayName("должен обновлять комментарий")
-    fun shouldUpdateComment() {
-        val comment = em.find(Comment::class.java, 1L)
-        val updatedCommentText = "Updated comment text"
-        val updatedComment = comment.copy(text = updatedCommentText)
+    fun shouldSaveUpdatedComment() {
+        val expectedComment =
+            Comment(
+                id = 1L,
+                text = "Updated comment text",
+                book = dbBooks[0],
+            )
 
-        repositoryJpa.save(updatedComment)
+        assertThat(em.find(Comment::class.java, expectedComment.id))
+            .isNotNull
+            .usingRecursiveComparison()
+            .isNotEqualTo(expectedComment)
+
+        val returnedComment = repositoryJpa.save(expectedComment)
+
+        assertThat(returnedComment)
+            .isNotNull
+            .matches { it.id > 0 }
+            .usingRecursiveComparison()
+            .ignoringExpectedNullFields()
+            .isEqualTo(expectedComment)
+
         em.flush()
         em.clear()
 
-        val actualComment = em.find(Comment::class.java, 1L)
+        val actualComment = em.find(Comment::class.java, returnedComment.id)
         assertThat(actualComment)
-            .isNotNull
-            .matches { it.text == updatedCommentText }
+            .usingRecursiveComparison()
+            .isEqualTo(returnedComment)
     }
 
-    @Test
     @DisplayName("должен удалять комментарий по id")
+    @Test
     fun shouldDeleteComment() {
-        val comment = em.find(Comment::class.java, 1L)
-        assertThat(comment).isNotNull
+        val commentId = 1L
+        val bookId = 1L
 
-        repositoryJpa.deleteById(1L)
+        val commentsBeforeDelete = repositoryJpa.findAllByBookId(bookId)
+        assertThat(commentsBeforeDelete)
+            .isNotEmpty
+            .anyMatch { it.id == commentId }
+
+        assertThat(em.find(Comment::class.java, commentId))
+            .isNotNull
+
+        repositoryJpa.deleteById(commentId)
         em.flush()
         em.clear()
 
-        val deletedComment = em.find(Comment::class.java, 1L)
-        assertThat(deletedComment).isNull()
+        assertThat(em.find(Comment::class.java, commentId))
+            .isNull()
+
+        val commentsAfterDelete = repositoryJpa.findAllByBookId(bookId)
+        assertThat(commentsAfterDelete)
+            .noneMatch { it.id == commentId }
     }
 
-    @Test
-    @DisplayName("должен возвращать null если комментарий не найден")
-    fun shouldReturnNullIfCommentNotFound() {
-        val comment =
-            repositoryJpa
-                .findById(999L)
-                .getOrNull()
-        assertThat(comment).isNull()
-    }
+    companion object {
+        private fun getDbAuthors(): List<Author> = (1L..3L).map { Author(id = it, fullName = "Author_$it") }
 
-    @Test
-    @DisplayName("должен возвращать пустой список если комментарии для книги не найдены")
-    fun shouldReturnEmptyListIfCommentsNotFound() {
-        val comments = repositoryJpa.findAllByBookId(999L)
-        assertThat(comments).isEmpty()
+        private fun getDbGenres(): List<Genre> = (1L..3L).map { Genre(id = it, name = "Genre_$it") }
+
+        private fun getDbBooks(
+            dbAuthors: List<Author>,
+            dbGenres: List<Genre>,
+        ): List<Book> =
+            (1L..3L).map {
+                Book(
+                    id = it,
+                    title = "BookTitle_$it",
+                    author = dbAuthors[(it - 1).toInt()],
+                    genre = dbGenres[(it - 1).toInt()],
+                )
+            }
+
+        private fun getDbComments(dbBooks: List<Book>): List<Comment> =
+            listOf(
+                Comment(id = 1L, text = "Comment_1 for Book_1", book = dbBooks[0]),
+                Comment(id = 2L, text = "Comment_2 for Book_1", book = dbBooks[0]),
+                Comment(id = 3L, text = "Comment_3 for Book_2", book = dbBooks[1]),
+            )
+
+        @JvmStatic
+        fun getDbComments(): List<Comment> {
+            val dbAuthors = getDbAuthors()
+            val dbGenres = getDbGenres()
+            val dbBooks = getDbBooks(dbAuthors, dbGenres)
+            return getDbComments(dbBooks)
+        }
     }
 }

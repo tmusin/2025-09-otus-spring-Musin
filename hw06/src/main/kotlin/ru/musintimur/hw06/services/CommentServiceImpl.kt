@@ -42,8 +42,8 @@ open class CommentServiceImpl(
         val comment =
             commentRepository.findById(id).getOrNull()
                 ?: throw EntityNotFoundException("Comment with id $id not found")
-        val updatedComment = comment.copy(text = text)
-        return commentRepository.save(updatedComment)
+        comment.text = text
+        return commentRepository.save(comment)
     }
 
     @Transactional

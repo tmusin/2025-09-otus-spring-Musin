@@ -12,7 +12,7 @@ import jakarta.persistence.Table
 data class Author(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long = 0,
     @Column(name = "full_name", nullable = false)
-    val fullName: String,
+    var fullName: String,
 )

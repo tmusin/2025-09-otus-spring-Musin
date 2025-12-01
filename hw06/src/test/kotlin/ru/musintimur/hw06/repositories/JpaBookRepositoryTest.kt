@@ -1,8 +1,11 @@
 package ru.musintimur.hw06.repositories
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
@@ -10,7 +13,6 @@ import org.springframework.context.annotation.Import
 import ru.musintimur.hw06.models.Author
 import ru.musintimur.hw06.models.Book
 import ru.musintimur.hw06.models.Genre
-import kotlin.jvm.optionals.getOrNull
 
 @DataJpaTest
 @Import(JpaBookRepository::class)
@@ -22,115 +24,139 @@ class JpaBookRepositoryTest {
     @Autowired
     private lateinit var em: TestEntityManager
 
-    @Test
+    private lateinit var dbAuthors: List<Author>
+    private lateinit var dbGenres: List<Genre>
+    private lateinit var dbBooks: List<Book>
+
+    @BeforeEach
+    fun setUp() {
+        dbAuthors = getDbAuthors()
+        dbGenres = getDbGenres()
+        dbBooks = getDbBooks(dbAuthors, dbGenres)
+    }
+
     @DisplayName("должен загружать книгу по id")
-    fun shouldReturnCorrectBookById() {
-        val expectedBook = em.find(Book::class.java, 1L)
-        val actualBook =
-            repositoryJpa
-                .findById(expectedBook.id)
-                .getOrNull()
+    @ParameterizedTest
+    @MethodSource("getDbBooks")
+    fun shouldReturnCorrectBookById(expectedBook: Book) {
+        val actualBook = repositoryJpa.findById(expectedBook.id)
 
         assertThat(actualBook)
-            .isNotNull
-            .matches { (it?.id ?: 0) > 0 }
-            .matches { it?.title.orEmpty() == "BookTitle_1" }
-
-        assertThat(actualBook!!.author)
-            .isNotNull
-            .matches { it.id > 0 }
-            .matches { it.fullName.isNotBlank() }
-
-        assertThat(actualBook.genre)
-            .isNotNull
-            .matches { it.id > 0 }
-            .matches { it.name.isNotBlank() }
+            .isPresent
+            .get()
+            .usingRecursiveComparison()
+            .isEqualTo(expectedBook)
     }
 
-    @Test
     @DisplayName("должен загружать список всех книг")
+    @Test
     fun shouldReturnCorrectBooksList() {
-        val books = repositoryJpa.findAll()
-        assertThat(books)
-            .isNotNull
-            .hasSize(3)
-            .allMatch { it.id > 0 }
-            .allMatch { it.title.isNotBlank() }
-            .allMatch { it.author.fullName.isNotBlank() }
-            .allMatch { it.genre.name.isNotBlank() }
+        val actualBooks = repositoryJpa.findAll()
+        val expectedBooks = dbBooks
+
+        assertThat(actualBooks)
+            .usingRecursiveFieldByFieldElementComparator()
+            .containsExactlyInAnyOrderElementsOf(expectedBooks)
     }
 
-    @Test
     @DisplayName("должен сохранять новую книгу")
+    @Test
     fun shouldSaveNewBook() {
-        val author = em.find(Author::class.java, 1L)
-        val genre = em.find(Genre::class.java, 1L)
-
-        val newBook =
+        val expectedBook =
             Book(
-                title = "NewBookTitle",
-                author = author,
-                genre = genre,
+                title = "BookTitle_10500",
+                author = dbAuthors[0],
+                genre = dbGenres[0],
             )
 
-        val savedBook = repositoryJpa.save(newBook)
-        assertThat(savedBook.id).isGreaterThan(0)
+        val returnedBook = repositoryJpa.save(expectedBook)
 
-        val actualBook = em.find(Book::class.java, savedBook.id)
-        assertThat(actualBook)
+        assertThat(returnedBook)
             .isNotNull
-            .matches { it.title == "NewBookTitle" }
-            .matches { it.author.id == author.id }
-            .matches { it.genre.id == genre.id }
+            .matches { it.id > 0 }
+            .usingRecursiveComparison()
+            .ignoringExpectedNullFields()
+            .isEqualTo(expectedBook)
+
+        val actualBook = em.find(Book::class.java, returnedBook.id)
+        assertThat(actualBook)
+            .usingRecursiveComparison()
+            .isEqualTo(returnedBook)
     }
 
+    @DisplayName("должен сохранять измененную книгу")
     @Test
-    @DisplayName("должен обновлять книгу")
-    fun shouldUpdateBook() {
-        val book = em.find(Book::class.java, 1L)
-        val author = em.find(Author::class.java, 2L)
-        val genres = em.find(Genre::class.java, 3L)
-
-        val updatedBook =
-            book.copy(
-                title = "UpdatedBookTitle",
-                author = author,
-                genre = genres,
+    fun shouldSaveUpdatedBook() {
+        val expectedBook =
+            Book(
+                id = 1L,
+                title = "BookTitle_10500",
+                author = dbAuthors[2],
+                genre = dbGenres[2],
             )
 
-        repositoryJpa.save(updatedBook)
+        assertThat(em.find(Book::class.java, expectedBook.id))
+            .isNotNull
+            .usingRecursiveComparison()
+            .isNotEqualTo(expectedBook)
+
+        val returnedBook = repositoryJpa.save(expectedBook)
+
+        assertThat(returnedBook)
+            .isNotNull
+            .matches { it.id > 0 }
+            .usingRecursiveComparison()
+            .ignoringExpectedNullFields()
+            .isEqualTo(expectedBook)
+
         em.flush()
         em.clear()
 
-        val actualBook = em.find(Book::class.java, 1L)
+        val actualBook = em.find(Book::class.java, returnedBook.id)
         assertThat(actualBook)
-            .isNotNull
-            .matches { it.title == "UpdatedBookTitle" }
-            .matches { it.author.id == author.id }
-            .matches { it.genre.id == genres.id }
+            .usingRecursiveComparison()
+            .isEqualTo(returnedBook)
     }
 
-    @Test
     @DisplayName("должен удалять книгу по id")
+    @Test
     fun shouldDeleteBook() {
-        val book = em.find(Book::class.java, 1L)
-        assertThat(book).isNotNull
+        val bookId = 1L
 
-        repositoryJpa.deleteById(1L)
+        assertThat(em.find(Book::class.java, bookId))
+            .isNotNull
+
+        repositoryJpa.deleteById(bookId)
         em.flush()
         em.clear()
 
-        val deletedBook = em.find(Book::class.java, 1L)
-        assertThat(deletedBook).isNull()
+        assertThat(em.find(Book::class.java, bookId))
+            .isNull()
     }
 
-    @Test
-    @DisplayName("должен возвращать null если книга не найдена")
-    fun shouldReturnNullIfBookNotFound() {
-        val book =
-            repositoryJpa
-                .findById(999L)
-                .getOrNull()
-        assertThat(book).isNull()
+    companion object {
+        private fun getDbAuthors(): List<Author> = (1L..3L).map { Author(id = it, fullName = "Author_$it") }
+
+        private fun getDbGenres(): List<Genre> = (1L..3L).map { Genre(id = it, name = "Genre_$it") }
+
+        private fun getDbBooks(
+            dbAuthors: List<Author>,
+            dbGenres: List<Genre>,
+        ): List<Book> =
+            (1L..3L).map {
+                Book(
+                    id = it,
+                    title = "BookTitle_$it",
+                    author = dbAuthors[(it - 1).toInt()],
+                    genre = dbGenres[(it - 1).toInt()],
+                )
+            }
+
+        @JvmStatic
+        fun getDbBooks(): List<Book> {
+            val dbAuthors = getDbAuthors()
+            val dbGenres = getDbGenres()
+            return getDbBooks(dbAuthors, dbGenres)
+        }
     }
 }
