@@ -1,0 +1,17 @@
+spring:
+  data:
+    mongodb:
+      port: 0
+      database: test-library
+
+  main:
+    allow-bean-definition-overriding: true
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.7
+
+mongock:
+  enabled: false

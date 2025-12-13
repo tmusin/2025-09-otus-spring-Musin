@@ -1,0 +1,25 @@
+spring:
+  data:
+    mongodb:
+      port: 0
+      database: library
+  main:
+    allow-bean-definition-overriding: true
+  shell:
+    interactive:
+      enabled: true
+    noninteractive:
+      enabled: false
+    command:
+      version:
+        enabled: false
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 8.0.5
+
+mongock:
+  migration-scan-package:
+    - ru.musintimur.hw08.changelog
