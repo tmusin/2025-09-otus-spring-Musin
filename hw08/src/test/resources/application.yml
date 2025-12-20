@@ -23,7 +23,7 @@ de:
 
 mongock:
   enabled: false
-  runner-type: "InitializingBean"
+  runner-type: "ApplicationRunner"
   migration-scan-package:
     - ru.musintimur.hw08.changelog
   change-logs-scan-package:
