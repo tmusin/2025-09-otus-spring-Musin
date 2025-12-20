@@ -20,11 +20,13 @@ open class CommentServiceImpl(
         text: String,
         bookId: String,
     ): Comment {
-        bookRepository
-            .findById(bookId)
-            .orElseThrow { EntityNotFoundException("Book with id $bookId not found") }
+        val book =
+            bookRepository
+                .findById(bookId)
+                .orElse(null)
+                ?: throw EntityNotFoundException("Book with id $bookId not found")
 
-        val comment = Comment(text = text, bookId = bookId)
+        val comment = Comment(text = text, book = book)
         return commentRepository.save(comment)
     }
 
@@ -37,7 +39,10 @@ open class CommentServiceImpl(
                 .findById(id)
                 .orElseThrow { EntityNotFoundException("Comment with id $id not found") }
 
-        val updatedComment = comment.copy(text = text)
+        val updatedComment =
+            comment.apply {
+                this.text = text
+            }
         return commentRepository.save(updatedComment)
     }
 

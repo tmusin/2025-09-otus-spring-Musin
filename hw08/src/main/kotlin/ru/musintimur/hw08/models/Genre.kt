@@ -4,8 +4,8 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "genres")
-data class Genre(
+open class Genre(
     @Id
-    val id: String? = null,
-    val name: String,
+    var id: String? = null,
+    var name: String,
 )

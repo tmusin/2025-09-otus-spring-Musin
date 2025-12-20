@@ -3,6 +3,14 @@ spring:
     mongodb:
       port: 0
       database: test-library
+  shell:
+    interactive:
+      enabled: false
+    noninteractive:
+      enabled: false
+    command:
+      version:
+        enabled: false
 
   main:
     allow-bean-definition-overriding: true
@@ -15,3 +23,12 @@ de:
 
 mongock:
   enabled: false
+  runner-type: "InitializingBean"
+  migration-scan-package:
+    - ru.musintimur.hw08.changelog
+  change-logs-scan-package:
+    - ru.musintimur.hw08.changelog
+  mongo-db:
+    write-concern:
+      journal: false
+    read-concern: local

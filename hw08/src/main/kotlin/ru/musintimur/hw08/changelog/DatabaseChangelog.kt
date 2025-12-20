@@ -27,9 +27,9 @@ class DatabaseChangelog(
         val book2 = mongoTemplate.save(Book(id = "2", title = "BookTitle_2", author = author2, genre = genre2))
         val book3 = mongoTemplate.save(Book(id = "3", title = "BookTitle_3", author = author3, genre = genre3))
 
-        mongoTemplate.save(Comment(id = "1", text = "Comment_1 for Book_1", bookId = book1.id!!))
-        mongoTemplate.save(Comment(id = "2", text = "Comment_2 for Book_1", bookId = book1.id!!))
-        mongoTemplate.save(Comment(id = "3", text = "Comment_3 for Book_2", bookId = book2.id!!))
+        mongoTemplate.save(Comment(id = "1", text = "Comment_1 for Book_1", book = book1))
+        mongoTemplate.save(Comment(id = "2", text = "Comment_2 for Book_1", book = book1))
+        mongoTemplate.save(Comment(id = "3", text = "Comment_3 for Book_2", book = book2))
     }
 
     @RollbackExecution

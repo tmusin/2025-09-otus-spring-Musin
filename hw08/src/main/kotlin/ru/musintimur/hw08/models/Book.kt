@@ -4,10 +4,10 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "books")
-data class Book(
+open class Book(
     @Id
-    val id: String? = null,
-    val title: String,
-    val author: Author,
-    val genre: Genre,
+    var id: String? = null,
+    var title: String,
+    var author: Author,
+    var genre: Genre,
 )

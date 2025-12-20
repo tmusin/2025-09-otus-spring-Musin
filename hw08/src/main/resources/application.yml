@@ -21,5 +21,12 @@ de:
         version: 8.0.5
 
 mongock:
+  runner-type: "InitializingBean"
   migration-scan-package:
     - ru.musintimur.hw08.changelog
+  change-logs-scan-package:
+    - ru.musintimur.hw08.changelog
+  mongo-db:
+    write-concern:
+      journal: false
+    read-concern: local

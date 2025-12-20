@@ -61,9 +61,9 @@ class CommentServiceImplTest {
 
         dbComments =
             listOf(
-                commentRepository.save(Comment(id = "1", text = "Comment_1", bookId = dbBooks[0].id!!)),
-                commentRepository.save(Comment(id = "2", text = "Comment_2", bookId = dbBooks[0].id!!)),
-                commentRepository.save(Comment(id = "3", text = "Comment_3", bookId = dbBooks[1].id!!)),
+                commentRepository.save(Comment(id = "1", text = "Comment_1", book = dbBooks[0])),
+                commentRepository.save(Comment(id = "2", text = "Comment_2", book = dbBooks[0])),
+                commentRepository.save(Comment(id = "3", text = "Comment_3", book = dbBooks[1])),
             )
     }
 
@@ -77,19 +77,27 @@ class CommentServiceImplTest {
             .isPresent
             .get()
             .usingRecursiveComparison()
+            .ignoringFields("book")
             .isEqualTo(expectedComment)
+
+        assertThat(actualComment.get().book.id).isEqualTo(expectedComment.book.id)
     }
 
     @Test
     @DisplayName("должен загружать комментарии по id книги")
     fun shouldReturnCorrectCommentsByBookId() {
         val bookId = dbBooks[0].id!!
-        val expectedComments = dbComments.filter { it.bookId == bookId }
+        val expectedComments = dbComments.filter { it.book.id == bookId }
         val actualComments = commentService.findAllByBookId(bookId)
 
         assertThat(actualComments)
-            .usingRecursiveFieldByFieldElementComparator()
+            .hasSize(expectedComments.size)
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("book")
             .containsExactlyInAnyOrderElementsOf(expectedComments)
+
+        actualComments.forEach {
+            assertThat(it.book.id).isEqualTo(bookId)
+        }
     }
 
     @Test
@@ -102,7 +110,7 @@ class CommentServiceImplTest {
             .isNotNull
             .matches { it.id != null }
             .matches { it.text == "New Comment" }
-            .matches { it.bookId == bookId }
+            .matches { it.book.id == bookId }
 
         val savedComment = commentRepository.findById(newComment.id!!)
         assertThat(savedComment).isPresent

@@ -1,6 +1,7 @@
 package ru.musintimur.hw08.services
 
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import ru.musintimur.hw08.exceptions.EntityNotFoundException
 import ru.musintimur.hw08.models.Book
 import ru.musintimur.hw08.repositories.AuthorRepository
@@ -44,9 +45,10 @@ open class BookServiceImpl(
         authorId: String,
         genreId: String,
     ): Book {
-        bookRepository
-            .findById(id)
-            .orElseThrow { EntityNotFoundException("Book with id $id not found") }
+        val book =
+            bookRepository
+                .findById(id)
+                .orElseThrow { EntityNotFoundException("Book with id $id not found") }
 
         val author =
             authorRepository
@@ -57,12 +59,16 @@ open class BookServiceImpl(
                 .findById(genreId)
                 .orElseThrow { EntityNotFoundException("Genre with id $genreId not found") }
 
-        val book = Book(id = id, title = title, author = author, genre = genre)
+        book.apply {
+            this.title = title
+            this.author = author
+            this.genre = genre
+        }
         return bookRepository.save(book)
     }
 
+    @Transactional
     override fun deleteById(id: String) {
-        commentRepository.deleteAllByBookId(id)
         bookRepository.deleteById(id)
     }
 }

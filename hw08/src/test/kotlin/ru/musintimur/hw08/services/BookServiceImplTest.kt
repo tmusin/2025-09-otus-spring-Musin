@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
+import ru.musintimur.hw08.events.BookCascadeDeleteEventListener
 import ru.musintimur.hw08.models.Author
 import ru.musintimur.hw08.models.Book
 import ru.musintimur.hw08.models.Comment
@@ -21,6 +22,7 @@ import ru.musintimur.hw08.repositories.GenreRepository
 @Import(
     BookServiceImpl::class,
     CommentServiceImpl::class,
+    BookCascadeDeleteEventListener::class,
 )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DisplayName("Сервис для работы с книгами")
@@ -71,6 +73,9 @@ class BookServiceImplTest {
                 bookRepository.save(Book(id = "2", title = "BookTitle_2", author = dbAuthors[1], genre = dbGenres[1])),
                 bookRepository.save(Book(id = "3", title = "BookTitle_3", author = dbAuthors[2], genre = dbGenres[2])),
             )
+
+        commentRepository.save(Comment(id = "1", text = "Comment_1", book = dbBooks[0]))
+        commentRepository.save(Comment(id = "2", text = "Comment_2", book = dbBooks[0]))
     }
 
     @Test
@@ -127,19 +132,15 @@ class BookServiceImplTest {
     }
 
     @Test
-    @DisplayName("должен удалять книгу и каскадно удалять комментарии")
+    @DisplayName("должен удалять книгу и автоматически каскадно удалять комментарии через EventListener")
     fun shouldDeleteBookAndCascadeDeleteComments() {
         val bookId = dbBooks[0].id!!
-
-        commentRepository.save(Comment(text = "Comment 1", bookId = bookId))
-        commentRepository.save(Comment(text = "Comment 2", bookId = bookId))
 
         assertThat(commentRepository.findAllByBookId(bookId)).hasSize(2)
 
         bookService.deleteById(bookId)
 
         assertThat(bookRepository.findById(bookId)).isEmpty
-
         assertThat(commentRepository.findAllByBookId(bookId)).isEmpty()
     }
 }
