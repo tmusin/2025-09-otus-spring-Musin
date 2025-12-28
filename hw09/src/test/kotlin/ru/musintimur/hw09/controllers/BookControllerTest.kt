@@ -76,7 +76,7 @@ class BookControllerTest {
 
     @Test
     fun testViewBookNotFound() {
-        `when`(bookService.findById(999)).thenReturn(null)
+        `when`(bookService.findById(999)).thenReturn(Optional.empty())
 
         mockMvc
             .perform(get("/books/999"))
