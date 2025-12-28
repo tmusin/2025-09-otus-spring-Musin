@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Просмотр книги</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .book-details { background: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+    .book-details p { margin: 10px 0; }
+    .comments { margin-top: 30px; }
+    .comment { background: #fff; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 3px; }
+    .btn { display: inline-block; padding: 8px 12px; margin: 2px; text-decoration: none; border-radius: 3px; background: #0066cc; color: white; }
+    .btn:hover { background: #0052a3; }
+    .home-link { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="home-link"><a href="/">← Главная</a></div>
+  <h1>Просмотр книги</h1>
+  <div class="book-details">
+    <p><strong>Название:</strong> <span th:text="${book.title}"></span></p>
+    <p><strong>Автор:</strong> <span th:text="${book.author.fullName}"></span></p>
+    <p><strong>Жанр:</strong> <span th:text="${book.genre.name}"></span></p>
+  </div>
+  <a href="/books" class="btn">Вернуться к списку</a>
+  <a th:href="@{/books/{id}/edit(id=${book.id})}" class="btn">Редактировать</a>
+
+  <div class="comments">
+    <h2>Комментарии</h2>
+    <div th:if="${!comments.isEmpty()}">
+      <div class="comment" th:each="comment : ${comments}">
+        <p th:text="${comment.text}"></p>
+      </div>
+    </div>
+    <p th:if="${comments.isEmpty()}">Нет комментариев.</p>
+  </div>
+</div>
+</body>
+</html>

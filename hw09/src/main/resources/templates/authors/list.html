@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Список авторов</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f0f0f0; font-weight: bold; }
+        tr:hover { background-color: #f5f5f5; }
+        .home-link { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="home-link"><a href="/">← Главная</a></div>
+    <h1>Список авторов</h1>
+    <table th:if="${!authors.isEmpty()}">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Полное имя</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="author : ${authors}">
+            <td th:text="${author.id}"></td>
+            <td th:text="${author.fullName}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${authors.isEmpty()}">Нет авторов.</p>
+</div>
+</body>
+</html>
