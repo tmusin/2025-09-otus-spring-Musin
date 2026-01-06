@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -38,8 +37,8 @@
         <tr th:each="book : ${books}">
             <td th:text="${book.id}"></td>
             <td><a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}"></a></td>
-            <td th:text="${book.author.fullName}"></td>
-            <td th:text="${book.genre.name}"></td>
+            <td th:text="${book.authorFullName}"></td>
+            <td th:text="${book.genreName}"></td>
             <td>
                 <a th:href="@{/books/{id}/edit(id=${book.id})}" class="btn btn-primary">Редактировать</a>
                 <a th:href="@{/books/{id}/delete(id=${book.id})}" class="btn btn-danger">Удалить</a>

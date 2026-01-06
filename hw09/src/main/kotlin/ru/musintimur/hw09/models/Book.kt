@@ -11,6 +11,8 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.NamedAttributeNode
 import jakarta.persistence.NamedEntityGraph
 import jakarta.persistence.Table
+import ru.musintimur.hw09.dto.BookDto
+import ru.musintimur.hw09.dto.BookListItemDto
 
 @Entity
 @Table(name = "books")
@@ -29,8 +31,26 @@ data class Book(
     var title: String,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
-    var author: Author,
+    var author: Author?,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "genre_id")
-    var genre: Genre,
-)
+    var genre: Genre?,
+) {
+    fun toDto(): BookDto =
+        BookDto(
+            id = id,
+            title = title,
+            authorId = author?.id ?: 0,
+            authorFullName = author?.fullName.orEmpty(),
+            genreId = genre?.id ?: 0,
+            genreName = genre?.name.orEmpty(),
+        )
+
+    fun toListItemDto() =
+        BookListItemDto(
+            id = id,
+            title = title,
+            authorFullName = author?.fullName.orEmpty(),
+            genreName = genre?.name.orEmpty(),
+        )
+}

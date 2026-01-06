@@ -16,14 +16,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
+import ru.musintimur.hw09.dto.BookDto
+import ru.musintimur.hw09.dto.BookIdDto
+import ru.musintimur.hw09.dto.BookListItemDto
 import ru.musintimur.hw09.models.Author
-import ru.musintimur.hw09.models.Book
 import ru.musintimur.hw09.models.Genre
 import ru.musintimur.hw09.services.AuthorService
 import ru.musintimur.hw09.services.BookService
 import ru.musintimur.hw09.services.CommentService
 import ru.musintimur.hw09.services.GenreService
-import java.util.Optional
 
 @WebMvcTest(BookController::class)
 class BookControllerTest {
@@ -44,18 +45,34 @@ class BookControllerTest {
 
     private lateinit var testAuthor: Author
     private lateinit var testGenre: Genre
-    private lateinit var testBook: Book
+    private lateinit var testBookDto: BookDto
+    private lateinit var testBookListItemDto: BookListItemDto
 
     @BeforeEach
     fun setUp() {
         testAuthor = Author(id = 1, fullName = "Test Author")
         testGenre = Genre(id = 1, name = "Test Genre")
-        testBook = Book(id = 1, title = "Test Book", author = testAuthor, genre = testGenre)
+        testBookDto =
+            BookDto(
+                id = 1,
+                title = "Test Book",
+                authorId = 1,
+                authorFullName = "Test Author",
+                genreId = 1,
+                genreName = "Test Genre",
+            )
+        testBookListItemDto =
+            BookListItemDto(
+                id = 1,
+                title = "Test Book",
+                authorFullName = "Test Author",
+                genreName = "Test Genre",
+            )
     }
 
     @Test
     fun testListBooks() {
-        `when`(bookService.findAll()).thenReturn(listOf(testBook))
+        `when`(bookService.findAll()).thenReturn(listOf(testBookListItemDto))
 
         mockMvc
             .perform(get("/books"))
@@ -65,7 +82,7 @@ class BookControllerTest {
 
     @Test
     fun testViewBook() {
-        `when`(bookService.findById(1)).thenReturn(Optional.of(testBook))
+        `when`(bookService.findById(BookIdDto(1))).thenReturn(testBookDto)
         `when`(commentService.findAllByBookId(1)).thenReturn(emptyList())
 
         mockMvc
@@ -76,7 +93,7 @@ class BookControllerTest {
 
     @Test
     fun testViewBookNotFound() {
-        `when`(bookService.findById(999)).thenReturn(Optional.empty())
+        `when`(bookService.findById(BookIdDto(999))).thenReturn(null)
 
         mockMvc
             .perform(get("/books/999"))
@@ -97,7 +114,7 @@ class BookControllerTest {
 
     @Test
     fun testSaveBook() {
-        `when`(bookService.insert(any(), any(), any())).thenReturn(testBook)
+        `when`(bookService.insert(any())).thenReturn(testBookDto)
 
         mockMvc
             .perform(
@@ -111,7 +128,7 @@ class BookControllerTest {
 
     @Test
     fun testEditBookForm() {
-        `when`(bookService.findById(1)).thenReturn(Optional.of(testBook))
+        `when`(bookService.findById(BookIdDto(1))).thenReturn(testBookDto)
         `when`(authorService.findAll()).thenReturn(listOf(testAuthor))
         `when`(genreService.findAll()).thenReturn(listOf(testGenre))
 
@@ -123,7 +140,7 @@ class BookControllerTest {
 
     @Test
     fun testUpdateBook() {
-        `when`(bookService.update(any(), any(), any(), any())).thenReturn(testBook)
+        `when`(bookService.update(any())).thenReturn(testBookDto)
 
         mockMvc
             .perform(
@@ -137,7 +154,7 @@ class BookControllerTest {
 
     @Test
     fun testDeleteConfirmForm() {
-        `when`(bookService.findById(1)).thenReturn(Optional.of(testBook))
+        `when`(bookService.findById(BookIdDto(1))).thenReturn(testBookDto)
 
         mockMvc
             .perform(get("/books/1/delete"))
@@ -147,13 +164,13 @@ class BookControllerTest {
 
     @Test
     fun testDeleteBook() {
-        doNothing().`when`(bookService).deleteById(1)
+        doNothing().`when`(bookService).deleteById(BookIdDto(1))
 
         mockMvc
             .perform(post("/books/1/delete"))
             .andExpect(status().is3xxRedirection)
             .andExpect(redirectedUrl("/books"))
 
-        verify(bookService).deleteById(1)
+        verify(bookService).deleteById(BookIdDto(1))
     }
 }

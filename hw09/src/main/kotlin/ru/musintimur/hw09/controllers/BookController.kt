@@ -4,17 +4,17 @@ package ru.musintimur.hw09.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import ru.musintimur.hw09.exceptions.EntityNotFoundException
-import ru.musintimur.hw09.models.Book
+import ru.musintimur.hw09.dto.BookCreateDto
+import ru.musintimur.hw09.dto.BookIdDto
+import ru.musintimur.hw09.dto.BookUpdateDto
 import ru.musintimur.hw09.services.AuthorService
 import ru.musintimur.hw09.services.BookService
 import ru.musintimur.hw09.services.CommentService
 import ru.musintimur.hw09.services.GenreService
-import java.util.Optional
 
 @Controller
 @RequestMapping("/books")
@@ -35,25 +35,22 @@ class BookController(
         @PathVariable id: Long,
         model: Model,
     ): String {
-        val book = bookService.findById(id)
-        if (book.isEmpty) {
-            return "redirect:/books"
-        }
-        model.addAttribute("book", book.get())
+        val book = bookService.findById(BookIdDto(id)) ?: return "redirect:/books"
+        model.addAttribute("book", book)
         model.addAttribute("comments", commentService.findAllByBookId(id))
         return "books/view"
     }
 
     @GetMapping("/create")
     fun createBookForm(model: Model): String {
-        val author = authorService.findAll().firstOrNull() ?: throw EntityNotFoundException("No authors found")
-        val genre = genreService.findAll().firstOrNull() ?: throw EntityNotFoundException("No genres found")
+        val authorId = authorService.findAll().firstOrNull()?.id
+        val genreId = genreService.findAll().firstOrNull()?.id
         model.addAttribute(
-            "book",
-            Book(
+            "dto",
+            BookCreateDto(
                 title = "",
-                author = author,
-                genre = genre,
+                authorId = authorId,
+                genreId = genreId,
             ),
         )
         model.addAttribute("authors", authorService.findAll())
@@ -63,11 +60,9 @@ class BookController(
 
     @PostMapping
     fun saveBook(
-        @RequestParam title: String,
-        @RequestParam authorId: Long,
-        @RequestParam genreId: Long,
+        @ModelAttribute("dto") dto: BookCreateDto,
     ): String {
-        bookService.insert(title, authorId, genreId)
+        bookService.insert(dto)
         return "redirect:/books"
     }
 
@@ -76,11 +71,16 @@ class BookController(
         @PathVariable id: Long,
         model: Model,
     ): String {
-        val book = bookService.findById(id)
-        if (book.isEmpty) {
-            return "redirect:/books"
-        }
-        model.addAttribute("book", book.get())
+        val book = bookService.findById(BookIdDto(id)) ?: return "redirect:/books"
+        val dto =
+            BookUpdateDto(
+                id = book.id,
+                title = book.title,
+                authorId = book.authorId,
+                genreId = book.genreId,
+            )
+        model.addAttribute("dto", dto)
+        model.addAttribute("bookId", id)
         model.addAttribute("authors", authorService.findAll())
         model.addAttribute("genres", genreService.findAll())
         return "books/form"
@@ -89,11 +89,10 @@ class BookController(
     @PostMapping("/{id}")
     fun updateBook(
         @PathVariable id: Long,
-        @RequestParam title: String,
-        @RequestParam authorId: Long,
-        @RequestParam genreId: Long,
+        @ModelAttribute("dto") dto: BookUpdateDto,
     ): String {
-        bookService.update(id, title, authorId, genreId)
+        val updatedDto = dto.copy(id = id)
+        bookService.update(updatedDto)
         return "redirect:/books/$id"
     }
 
@@ -102,11 +101,8 @@ class BookController(
         @PathVariable id: Long,
         model: Model,
     ): String {
-        val book: Optional<Book> = bookService.findById(id)
-        if (book.isEmpty) {
-            return "redirect:/books"
-        }
-        model.addAttribute("book", book.get())
+        val book = bookService.findById(BookIdDto(id)) ?: return "redirect:/books"
+        model.addAttribute("book", book)
         return "books/delete-confirm"
     }
 
@@ -114,7 +110,7 @@ class BookController(
     fun deleteBook(
         @PathVariable id: Long,
     ): String {
-        bookService.deleteById(id)
+        bookService.deleteById(BookIdDto(id))
         return "redirect:/books"
     }
 }

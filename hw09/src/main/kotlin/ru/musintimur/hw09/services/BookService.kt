@@ -1,25 +1,19 @@
 package ru.musintimur.hw09.services
 
-import ru.musintimur.hw09.models.Book
-import java.util.Optional
+import ru.musintimur.hw09.dto.BookCreateDto
+import ru.musintimur.hw09.dto.BookDto
+import ru.musintimur.hw09.dto.BookIdDto
+import ru.musintimur.hw09.dto.BookListItemDto
+import ru.musintimur.hw09.dto.BookUpdateDto
 
 interface BookService {
-    fun findById(id: Long): Optional<Book>
+    fun findById(dto: BookIdDto): BookDto?
 
-    fun findAll(): List<Book>
+    fun findAll(): List<BookListItemDto>
 
-    fun insert(
-        title: String,
-        authorId: Long,
-        genreId: Long,
-    ): Book
+    fun insert(dto: BookCreateDto): BookDto
 
-    fun update(
-        id: Long,
-        title: String,
-        authorId: Long,
-        genreId: Long,
-    ): Book
+    fun update(dto: BookUpdateDto): BookDto
 
-    fun deleteById(id: Long)
+    fun deleteById(dto: BookIdDto)
 }

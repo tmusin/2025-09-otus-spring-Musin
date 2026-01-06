@@ -21,8 +21,8 @@
   <h1>Просмотр книги</h1>
   <div class="book-details">
     <p><strong>Название:</strong> <span th:text="${book.title}"></span></p>
-    <p><strong>Автор:</strong> <span th:text="${book.author.fullName}"></span></p>
-    <p><strong>Жанр:</strong> <span th:text="${book.genre.name}"></span></p>
+    <p><strong>Автор:</strong> <span th:text="${book.authorFullName}"></span></p>
+    <p><strong>Жанр:</strong> <span th:text="${book.genreName}"></span></p>
   </div>
   <a href="/books" class="btn">Вернуться к списку</a>
   <a th:href="@{/books/{id}/edit(id=${book.id})}" class="btn">Редактировать</a>
