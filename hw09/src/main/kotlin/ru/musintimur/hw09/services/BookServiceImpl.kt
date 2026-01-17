@@ -20,8 +20,8 @@ open class BookServiceImpl(
     private val genreRepository: GenreRepository,
 ) : BookService {
     @Transactional(readOnly = true)
-    override fun findById(dto: BookIdDto): BookDto? {
-        val book = bookRepository.findById(dto.id).orElse(null) ?: return null
+    override fun findById(dto: BookIdDto): BookDto {
+        val book = bookRepository.findById(dto.id).orElseThrow { EntityNotFoundException("Book with id ${dto.id} not found") }
         return book.toDto()
     }
 

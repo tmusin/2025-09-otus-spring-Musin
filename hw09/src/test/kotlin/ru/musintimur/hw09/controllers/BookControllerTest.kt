@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
 import ru.musintimur.hw09.dto.BookDto
 import ru.musintimur.hw09.dto.BookIdDto
 import ru.musintimur.hw09.dto.BookListItemDto
+import ru.musintimur.hw09.exceptions.EntityNotFoundException
 import ru.musintimur.hw09.models.Author
 import ru.musintimur.hw09.models.Genre
 import ru.musintimur.hw09.services.AuthorService
@@ -93,12 +94,11 @@ class BookControllerTest {
 
     @Test
     fun testViewBookNotFound() {
-        `when`(bookService.findById(BookIdDto(999))).thenReturn(null)
+        `when`(bookService.findById(BookIdDto(999))).thenThrow(EntityNotFoundException::class.java)
 
         mockMvc
             .perform(get("/books/999"))
-            .andExpect(status().is3xxRedirection)
-            .andExpect(redirectedUrl("/books"))
+            .andExpect(status().isNotFound)
     }
 
     @Test

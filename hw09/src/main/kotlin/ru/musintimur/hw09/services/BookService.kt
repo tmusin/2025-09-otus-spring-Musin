@@ -7,7 +7,7 @@ import ru.musintimur.hw09.dto.BookListItemDto
 import ru.musintimur.hw09.dto.BookUpdateDto
 
 interface BookService {
-    fun findById(dto: BookIdDto): BookDto?
+    fun findById(dto: BookIdDto): BookDto
 
     fun findAll(): List<BookListItemDto>
 
