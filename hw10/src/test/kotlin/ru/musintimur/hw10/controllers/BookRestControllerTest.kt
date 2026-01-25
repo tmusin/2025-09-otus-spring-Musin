@@ -42,20 +42,22 @@ class BookRestControllerTest {
 
     @BeforeEach
     fun setUp() {
-        testBookDto = BookDto(
-            id = 1,
-            title = "Test Book",
-            authorId = 1,
-            authorFullName = "Test Author",
-            genreId = 1,
-            genreName = "Test Genre",
-        )
-        testBookListItemDto = BookListItemDto(
-            id = 1,
-            title = "Test Book",
-            authorFullName = "Test Author",
-            genreName = "Test Genre",
-        )
+        testBookDto =
+            BookDto(
+                id = 1,
+                title = "Test Book",
+                authorId = 1,
+                authorFullName = "Test Author",
+                genreId = 1,
+                genreName = "Test Genre",
+            )
+        testBookListItemDto =
+            BookListItemDto(
+                id = 1,
+                title = "Test Book",
+                authorFullName = "Test Author",
+                genreName = "Test Genre",
+            )
     }
 
     @Test
@@ -95,11 +97,12 @@ class BookRestControllerTest {
 
     @Test
     fun testCreateBook() {
-        val createDto = BookCreateDto(
-            title = "New Book",
-            authorId = 1,
-            genreId = 1,
-        )
+        val createDto =
+            BookCreateDto(
+                title = "New Book",
+                authorId = 1,
+                genreId = 1,
+            )
 
         `when`(bookService.insert(any())).thenReturn(testBookDto)
 
@@ -115,12 +118,13 @@ class BookRestControllerTest {
 
     @Test
     fun testUpdateBook() {
-        val updateDto = BookUpdateDto(
-            id = 1,
-            title = "Updated Book",
-            authorId = 1,
-            genreId = 1,
-        )
+        val updateDto =
+            BookUpdateDto(
+                id = 1,
+                title = "Updated Book",
+                authorId = 1,
+                genreId = 1,
+            )
 
         val updatedBook = testBookDto.copy(title = "Updated Book")
         `when`(bookService.update(any())).thenReturn(updatedBook)

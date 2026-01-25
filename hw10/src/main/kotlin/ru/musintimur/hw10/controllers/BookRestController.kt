@@ -23,17 +23,17 @@ class BookRestController(
     private val bookService: BookService,
 ) {
     @GetMapping
-    fun listBooks(): ResponseEntity<List<BookListItemDto>> {
-        return ResponseEntity.ok(bookService.findAll())
-    }
+    fun listBooks(): ResponseEntity<List<BookListItemDto>> = ResponseEntity.ok(bookService.findAll())
 
     @GetMapping("/{id}")
-    fun getBook(@PathVariable id: Long): ResponseEntity<BookDto> {
-        return ResponseEntity.ok(bookService.findById(BookIdDto(id)))
-    }
+    fun getBook(
+        @PathVariable id: Long,
+    ): ResponseEntity<BookDto> = ResponseEntity.ok(bookService.findById(BookIdDto(id)))
 
     @PostMapping
-    fun createBook(@RequestBody dto: BookCreateDto): ResponseEntity<BookDto> {
+    fun createBook(
+        @RequestBody dto: BookCreateDto,
+    ): ResponseEntity<BookDto> {
         val createdBook = bookService.insert(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBook)
     }
@@ -49,7 +49,9 @@ class BookRestController(
     }
 
     @DeleteMapping("/{id}")
-    fun deleteBook(@PathVariable id: Long): ResponseEntity<Void> {
+    fun deleteBook(
+        @PathVariable id: Long,
+    ): ResponseEntity<Void> {
         bookService.deleteById(BookIdDto(id))
         return ResponseEntity.noContent().build()
     }

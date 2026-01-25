@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import ru.musintimur.hw10.dto.BookIdDto
 import ru.musintimur.hw10.dto.BookCreateDto
+import ru.musintimur.hw10.dto.BookIdDto
 import ru.musintimur.hw10.dto.BookUpdateDto
-import ru.musintimur.hw10.services.BookService
 import ru.musintimur.hw10.services.AuthorService
-import ru.musintimur.hw10.services.GenreService
+import ru.musintimur.hw10.services.BookService
 import ru.musintimur.hw10.services.CommentService
+import ru.musintimur.hw10.services.GenreService
 
 @Controller
 @RequestMapping("/books")
@@ -26,9 +26,7 @@ class BookController(
     private val commentService: CommentService,
 ) {
     @GetMapping
-    fun listBooksPage(model: Model): String {
-        return "books/list"
-    }
+    fun listBooksPage(model: Model): String = "books/list"
 
     @GetMapping("/{id}")
     fun viewBook(

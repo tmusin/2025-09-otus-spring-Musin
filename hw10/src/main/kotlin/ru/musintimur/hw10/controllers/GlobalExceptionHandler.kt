@@ -11,19 +11,21 @@ import ru.musintimur.hw10.models.ErrorResponse
 class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException::class)
     fun handleEntityNotFound(ex: EntityNotFoundException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            message = ex.message ?: "Entity not found",
-            status = HttpStatus.NOT_FOUND.value(),
-        )
+        val errorResponse =
+            ErrorResponse(
+                message = ex.message ?: "Entity not found",
+                status = HttpStatus.NOT_FOUND.value(),
+            )
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
     }
 
     @ExceptionHandler(Exception::class)
     fun handleGeneralException(ex: Exception): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            message = ex.message ?: "Internal server error",
-            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        )
+        val errorResponse =
+            ErrorResponse(
+                message = ex.message ?: "Internal server error",
+                status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            )
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
     }
 }
