@@ -5,37 +5,71 @@
   <title>Просмотр книги</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
-    .book-details { background: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-    .book-details p { margin: 10px 0; }
-    .comments { margin-top: 30px; }
-    .comment { background: #fff; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 3px; }
-    .btn { display: inline-block; padding: 8px 12px; margin: 2px; text-decoration: none; border-radius: 3px; background: #0066cc; color: white; }
-    .btn:hover { background: #0052a3; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .book-info { margin: 20px 0; }
+    .book-info p { margin: 10px 0; }
+    .btn { display: inline-block; padding: 8px 12px; margin: 2px; text-decoration: none; border-radius: 3px; border: none; cursor: pointer; }
+    .btn-primary { background: #0066cc; color: white; }
+    .btn-danger { background: #cc0000; color: white; }
+    .btn-primary:hover { background: #0052a3; }
+    .btn-danger:hover { background: #990000; }
     .home-link { margin-bottom: 20px; }
+    .loading { text-align: center; color: #666; }
+    .error { color: #cc0000; padding: 10px; background: #ffeeee; border: 1px solid #cc0000; border-radius: 3px; }
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="home-link"><a href="/">← Главная</a></div>
-  <h1>Просмотр книги</h1>
-  <div class="book-details">
-    <p><strong>Название:</strong> <span th:text="${book.title}"></span></p>
-    <p><strong>Автор:</strong> <span th:text="${book.authorFullName}"></span></p>
-    <p><strong>Жанр:</strong> <span th:text="${book.genreName}"></span></p>
-  </div>
-  <a href="/books" class="btn">Вернуться к списку</a>
-  <a th:href="@{/books/{id}/edit(id=${book.id})}" class="btn">Редактировать</a>
+  <div class="home-link"><a href="/books">← Назад к списку книг</a></div>
+  <h1 id="title">Загрузка...</h1>
 
-  <div class="comments">
-    <h2>Комментарии</h2>
-    <div th:if="${!comments.isEmpty()}">
-      <div class="comment" th:each="comment : ${comments}">
-        <p th:text="${comment.text}"></p>
-      </div>
+  <div class="error" id="errorMsg" style="display: none;"></div>
+  <div class="loading" id="loading">Загрузка...</div>
+
+  <div class="book-info" id="bookInfo" style="display: none;">
+    <p><strong>ID:</strong> <span id="bookId"></span></p>
+    <p><strong>Название:</strong> <span id="bookTitle"></span></p>
+    <p><strong>Автор:</strong> <span id="authorName"></span></p>
+    <p><strong>Жанр:</strong> <span id="genreName"></span></p>
+
+    <h3>Комментарии</h3>
+    <div id="comments"></div>
+
+    <div style="margin-top: 20px;">
+      <a href="" id="editLink" class="btn btn-primary">Редактировать</a>
+      <a href="" id="deleteLink" class="btn btn-danger">Удалить</a>
     </div>
-    <p th:if="${comments.isEmpty()}">Нет комментариев.</p>
   </div>
 </div>
+
+<script>
+  const bookId = window.location.pathname.split('/')[2];
+
+  async function loadBook() {
+      try {
+          const response = await fetch(`/api/books/${bookId}`);
+          if (!response.ok) throw new Error('Книга не найдена');
+          const book = await response.json();
+
+          document.getElementById('title').textContent = book.title;
+          document.getElementById('bookId').textContent = book.id;
+          document.getElementById('bookTitle').textContent = book.title;
+          document.getElementById('authorName').textContent = book.authorFullName;
+          document.getElementById('genreName').textContent = book.genreName;
+
+          document.getElementById('editLink').href = `/books/${book.id}/edit`;
+          document.getElementById('deleteLink').href = `/books/${book.id}/delete`;
+
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('bookInfo').style.display = 'block';
+      } catch (error) {
+          document.getElementById('errorMsg').textContent = error.message;
+          document.getElementById('errorMsg').style.display = 'block';
+          document.getElementById('loading').style.display = 'none';
+      }
+  }
+
+  loadBook();
+</script>
 </body>
 </html>

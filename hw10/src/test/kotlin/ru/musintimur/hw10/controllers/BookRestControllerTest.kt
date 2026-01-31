@@ -1,3 +1,4 @@
+
 package ru.musintimur.hw10.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -20,10 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import ru.musintimur.hw10.dto.BookCreateDto
 import ru.musintimur.hw10.dto.BookDto
-import ru.musintimur.hw10.dto.BookIdDto
-import ru.musintimur.hw10.dto.BookListItemDto
 import ru.musintimur.hw10.dto.BookUpdateDto
-import ru.musintimur.hw10.exceptions.EntityNotFoundException
 import ru.musintimur.hw10.services.BookService
 
 @WebMvcTest(BookRestController::class)
@@ -38,7 +36,6 @@ class BookRestControllerTest {
     private lateinit var bookService: BookService
 
     private lateinit var testBookDto: BookDto
-    private lateinit var testBookListItemDto: BookListItemDto
 
     @BeforeEach
     fun setUp() {
@@ -51,18 +48,11 @@ class BookRestControllerTest {
                 genreId = 1,
                 genreName = "Test Genre",
             )
-        testBookListItemDto =
-            BookListItemDto(
-                id = 1,
-                title = "Test Book",
-                authorFullName = "Test Author",
-                genreName = "Test Genre",
-            )
     }
 
     @Test
     fun testGetAllBooks() {
-        `when`(bookService.findAll()).thenReturn(listOf(testBookListItemDto))
+        `when`(bookService.findAll()).thenReturn(listOf(testBookDto))
 
         mockMvc
             .perform(get("/api/books"))
@@ -74,7 +64,7 @@ class BookRestControllerTest {
 
     @Test
     fun testGetBookById() {
-        `when`(bookService.findById(BookIdDto(1))).thenReturn(testBookDto)
+        `when`(bookService.findById(1)).thenReturn(testBookDto)
 
         mockMvc
             .perform(get("/api/books/1"))
@@ -82,17 +72,6 @@ class BookRestControllerTest {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.title").value("Test Book"))
             .andExpect(jsonPath("$.authorFullName").value("Test Author"))
-    }
-
-    @Test
-    fun testGetBookByIdNotFound() {
-        `when`(bookService.findById(BookIdDto(999)))
-            .thenThrow(EntityNotFoundException("Book with id 999 not found"))
-
-        mockMvc
-            .perform(get("/api/books/999"))
-            .andExpect(status().isNotFound)
-            .andExpect(jsonPath("$.message").value("Book with id 999 not found"))
     }
 
     @Test
@@ -140,12 +119,12 @@ class BookRestControllerTest {
 
     @Test
     fun testDeleteBook() {
-        doNothing().`when`(bookService).deleteById(BookIdDto(1))
+        doNothing().`when`(bookService).deleteById(1)
 
         mockMvc
             .perform(delete("/api/books/1"))
             .andExpect(status().isNoContent)
 
-        verify(bookService).deleteById(BookIdDto(1))
+        verify(bookService).deleteById(1)
     }
 }

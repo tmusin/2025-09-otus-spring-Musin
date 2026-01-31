@@ -4,8 +4,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.musintimur.hw10.dto.BookCreateDto
 import ru.musintimur.hw10.dto.BookDto
-import ru.musintimur.hw10.dto.BookIdDto
-import ru.musintimur.hw10.dto.BookListItemDto
 import ru.musintimur.hw10.dto.BookUpdateDto
 import ru.musintimur.hw10.exceptions.EntityNotFoundException
 import ru.musintimur.hw10.models.Book
@@ -20,28 +18,28 @@ open class BookServiceImpl(
     private val genreRepository: GenreRepository,
 ) : BookService {
     @Transactional(readOnly = true)
-    override fun findById(dto: BookIdDto): BookDto {
+    override fun findById(id: Long): BookDto {
         val book =
-            bookRepository.findById(dto.id).orElseThrow {
-                EntityNotFoundException(
-                    "Book with id ${dto.id} not found",
-                )
-            }
+            bookRepository
+                .findById(id)
+                .orElseThrow {
+                    EntityNotFoundException("Book with id $id not found")
+                }
         return book.toDto()
     }
 
     @Transactional(readOnly = true)
-    override fun findAll(): List<BookListItemDto> = bookRepository.findAll().map { it.toListItemDto() }
+    override fun findAll(): List<BookDto> = bookRepository.findAll().map { it.toDto() }
 
     @Transactional
     override fun insert(dto: BookCreateDto): BookDto {
         val author =
             authorRepository
-                .findById(dto.authorId)
+                .findById(dto.authorId ?: 0)
                 .orElseThrow { EntityNotFoundException("Author with id ${dto.authorId} not found") }
         val genre =
             genreRepository
-                .findById(dto.genreId)
+                .findById(dto.genreId ?: 0)
                 .orElseThrow { EntityNotFoundException("Genre with id ${dto.genreId} not found") }
 
         val book = Book(title = dto.title, author = author, genre = genre)
@@ -58,11 +56,11 @@ open class BookServiceImpl(
 
         val author =
             authorRepository
-                .findById(dto.authorId)
+                .findById(dto.authorId ?: 0)
                 .orElseThrow { EntityNotFoundException("Author with id ${dto.authorId} not found") }
         val genre =
             genreRepository
-                .findById(dto.genreId)
+                .findById(dto.genreId ?: 0)
                 .orElseThrow { EntityNotFoundException("Genre with id ${dto.genreId} not found") }
 
         book.title = dto.title
@@ -74,7 +72,7 @@ open class BookServiceImpl(
     }
 
     @Transactional
-    override fun deleteById(dto: BookIdDto) {
-        bookRepository.deleteById(dto.id)
+    override fun deleteById(id: Long) {
+        bookRepository.deleteById(id)
     }
 }

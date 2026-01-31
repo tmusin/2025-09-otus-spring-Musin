@@ -1,5 +1,6 @@
 package ru.musintimur.hw10.controllers
 
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -12,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import ru.musintimur.hw10.dto.BookCreateDto
 import ru.musintimur.hw10.dto.BookDto
-import ru.musintimur.hw10.dto.BookIdDto
-import ru.musintimur.hw10.dto.BookListItemDto
 import ru.musintimur.hw10.dto.BookUpdateDto
 import ru.musintimur.hw10.services.BookService
 
@@ -23,16 +22,16 @@ class BookRestController(
     private val bookService: BookService,
 ) {
     @GetMapping
-    fun listBooks(): ResponseEntity<List<BookListItemDto>> = ResponseEntity.ok(bookService.findAll())
+    fun listBooks(): ResponseEntity<List<BookDto>> = ResponseEntity.ok(bookService.findAll())
 
     @GetMapping("/{id}")
     fun getBook(
         @PathVariable id: Long,
-    ): ResponseEntity<BookDto> = ResponseEntity.ok(bookService.findById(BookIdDto(id)))
+    ): ResponseEntity<BookDto> = ResponseEntity.ok(bookService.findById(id))
 
     @PostMapping
     fun createBook(
-        @RequestBody dto: BookCreateDto,
+        @Valid @RequestBody dto: BookCreateDto,
     ): ResponseEntity<BookDto> {
         val createdBook = bookService.insert(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBook)
@@ -41,7 +40,7 @@ class BookRestController(
     @PutMapping("/{id}")
     fun updateBook(
         @PathVariable id: Long,
-        @RequestBody dto: BookUpdateDto,
+        @Valid @RequestBody dto: BookUpdateDto,
     ): ResponseEntity<BookDto> {
         val updatedDto = dto.copy(id = id)
         val updatedBook = bookService.update(updatedDto)
@@ -52,7 +51,7 @@ class BookRestController(
     fun deleteBook(
         @PathVariable id: Long,
     ): ResponseEntity<Void> {
-        bookService.deleteById(BookIdDto(id))
+        bookService.deleteById(id)
         return ResponseEntity.noContent().build()
     }
 }

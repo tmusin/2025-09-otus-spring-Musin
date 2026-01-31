@@ -2,64 +2,214 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${book != null ? 'Редактирование книги' : 'Добавление новой книги'}"></title>
+    <title id="pageTitle">Добавление новой книги</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input, select { width: 100%; padding: 8px; box-sizing: border-box; }
-        .error { color: #cc0000; font-size: 0.9em; }
+        .error { color: #cc0000; font-size: 0.9em; margin-top: 3px; }
+        .field-error { border: 1px solid #cc0000; }
+        .alert { padding: 10px; margin-bottom: 15px; border-radius: 3px; }
+        .alert-danger { background: #ffeeee; border: 1px solid #cc0000; color: #cc0000; display: none; }
         .btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 3px; }
         .btn-primary { background: #0066cc; color: white; }
-        .btn-danger { background: #cc0000; color: white; }
+        .btn-primary:hover { background: #0052a3; }
+        .btn-cancel { background: #999; color: white; text-decoration: none; display: inline-block; }
+        .btn-cancel:hover { background: #666; }
         .home-link { margin-bottom: 20px; }
+        .loading { text-align: center; color: #666; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="home-link"><a href="/books">← Назад к списку книг</a></div>
-    <h1 th:text="${book != null ? 'Редактирование книги' : 'Добавление новой книги'}"></h1>
+    <h1 id="pageHeader">Добавление новой книги</h1>
 
-    <form th:action="${book != null ? '/books/' + book.id : '/books'}"
-          th:method="post"
-          th:object="${dto}">
+    <div class="alert alert-danger" id="errorAlert"></div>
+    <div class="loading" id="loading">Загрузка...</div>
 
-        <input type="hidden" th:if="${book != null}" th:field="*{id}">
+    <form id="bookForm" style="display: none;">
+        <input type="hidden" id="bookId" value="">
 
         <div class="form-group">
             <label for="title">Название:</label>
-            <input type="text" id="title" th:field="*{title}" required>
-            <div class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+            <input type="text" id="title" required>
+            <div class="error" id="titleError"></div>
         </div>
 
         <div class="form-group">
             <label for="authorId">Автор:</label>
-            <select id="authorId" th:field="*{authorId}" required>
+            <select id="authorId" required>
                 <option value="">-- Выберите автора --</option>
-                <option th:each="author : ${authors}"
-                        th:value="${author.id}"
-                        th:text="${author.fullName}"></option>
             </select>
-            <div class="error" th:if="${#fields.hasErrors('authorId')}" th:errors="*{authorId}"></div>
+            <div class="error" id="authorIdError"></div>
         </div>
 
         <div class="form-group">
             <label for="genreId">Жанр:</label>
-            <select id="genreId" th:field="*{genreId}" required>
+            <select id="genreId" required>
                 <option value="">-- Выберите жанр --</option>
-                <option th:each="genre : ${genres}"
-                        th:value="${genre.id}"
-                        th:text="${genre.name}"></option>
             </select>
-            <div class="error" th:if="${#fields.hasErrors('genreId')}" th:errors="*{genreId}"></div>
+            <div class="error" id="genreIdError"></div>
         </div>
 
         <div>
-            <button type="submit" class="btn btn-primary" th:text="${book != null ? 'Сохранить' : 'Добавить'}"></button>
-            <a href="/books" class="btn">Отмена</a>
+            <button type="submit" class="btn btn-primary" id="submitBtn">Добавить</button>
+            <a href="/books" class="btn btn-cancel">Отмена</a>
         </div>
     </form>
 </div>
+
+<script>
+    const pathMatch = window.location.pathname.match(/\/books\/(\d+)\/edit/);
+    const bookId = pathMatch ? pathMatch[1] : null;
+    const isEditMode = bookId !== null;
+
+    async function init() {
+        showLoading(true);
+        try {
+            await Promise.all([loadAuthors(), loadGenres()]);
+
+            if (isEditMode) {
+                await loadBook(bookId);
+                document.getElementById('pageHeader').textContent = 'Редактирование книги';
+                document.getElementById('pageTitle').textContent = 'Редактирование книги';
+                document.getElementById('submitBtn').textContent = 'Сохранить';
+            }
+
+            document.getElementById('bookForm').style.display = 'block';
+        } catch (error) {
+            showError('Ошибка при загрузке данных: ' + error.message);
+            console.error('Init error:', error);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    async function loadAuthors() {
+        const response = await fetch('/api/authors');
+        if (!response.ok) throw new Error('Ошибка при загрузке авторов');
+        const authors = await response.json();
+        const select = document.getElementById('authorId');
+        authors.forEach(author => {
+            const option = document.createElement('option');
+            option.value = author.id;
+            option.textContent = author.fullName;
+            select.appendChild(option);
+        });
+    }
+
+    async function loadGenres() {
+        const response = await fetch('/api/genres');
+        if (!response.ok) throw new Error('Ошибка при загрузке жанров');
+        const genres = await response.json();
+        const select = document.getElementById('genreId');
+        genres.forEach(genre => {
+            const option = document.createElement('option');
+            option.value = genre.id;
+            option.textContent = genre.name;
+            select.appendChild(option);
+        });
+    }
+
+    async function loadBook(id) {
+        const response = await fetch(`/api/books/${id}`);
+        if (!response.ok) throw new Error('Ошибка при загрузке книги');
+        const book = await response.json();
+
+        document.getElementById('bookId').value = book.id;
+        document.getElementById('title').value = book.title;
+        document.getElementById('authorId').value = book.authorId;
+        document.getElementById('genreId').value = book.genreId;
+    }
+
+    document.getElementById('bookForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const bookData = {
+            title: document.getElementById('title').value,
+            authorId: parseInt(document.getElementById('authorId').value),
+            genreId: parseInt(document.getElementById('genreId').value),
+        };
+
+        try {
+            let response;
+            if (isEditMode) {
+                response = await fetch(`/api/books/${bookId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookData),
+                });
+            } else {
+                response = await fetch('/api/books', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookData),
+                });
+            }
+
+            if (!response.ok) {
+                const error = await response.json();
+
+                // Если это ошибка валидации (400), покажем ошибки полей
+                if (response.status === 400 && error.errors) {
+                    displayValidationErrors(error.errors);
+                } else {
+                    showError(error.message || 'Ошибка при сохранении');
+                }
+                return;
+            }
+
+            window.location.href = '/books';
+        } catch (error) {
+            showError(error.message);
+            console.error('Submit error:', error);
+        }
+    });
+
+    function displayValidationErrors(errors) {
+        Object.keys(errors).forEach(fieldName => {
+            const errorMessages = errors[fieldName];
+            const errorElement = document.getElementById(`${fieldName}Error`);
+
+            if (errorElement) {
+                errorElement.textContent = errorMessages.join(', ');
+                errorElement.style.display = 'block';
+
+                // Добавим красную границу к полю
+                const field = document.getElementById(fieldName);
+                if (field) {
+                    field.classList.add('field-error');
+                }
+            }
+        });
+    }
+
+    function showError(message) {
+        const alert = document.getElementById('errorAlert');
+        alert.textContent = message;
+        alert.style.display = 'block';
+    }
+
+    function clearErrors() {
+        document.getElementById('errorAlert').style.display = 'none';
+        document.querySelectorAll('.error').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        document.querySelectorAll('.field-error').forEach(el => {
+            el.classList.remove('field-error');
+        });
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+
+    init();
+</script>
 </body>
 </html>
