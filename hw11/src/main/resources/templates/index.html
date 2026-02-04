@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Библиотека - Главная</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { color: #333; }
+        nav { background: #f0f0f0; padding: 15px; border-radius: 5px; }
+        nav a { display: inline-block; margin: 5px 10px 5px 0; padding: 10px 15px; background: #0066cc; color: white; text-decoration: none; border-radius: 3px; }
+        nav a:hover { background: #0052a3; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Библиотека</h1>
+    <nav>
+        <a href="/books">Все книги</a>
+        <a href="/books/create">Добавить книгу</a>
+        <a href="/authors">Авторы</a>
+        <a href="/genres">Жанры</a>
+    </nav>
+</div>
+</body>
+</html>
