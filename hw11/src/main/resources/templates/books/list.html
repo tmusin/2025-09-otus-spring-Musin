@@ -87,8 +87,8 @@
                 <tr>
                     <td>${escapeHtml(String(book.id))}</td>
                     <td><a href="/books/${book.id}">${escapeHtml(book.title)}</a></td>
-                    <td>${escapeHtml(book.authorFullName)}</td>
-                    <td>${escapeHtml(book.genreName)}</td>
+                    <td>${escapeHtml(book.author.fullName)}</td>
+                    <td>${escapeHtml(book.genre.name)}</td>
                     <td>
                         <a href="/books/${book.id}/edit" class="btn btn-primary">Редактировать</a>
                         <button onclick="deleteBook('${book.id}')" class="btn btn-danger">Удалить</button>

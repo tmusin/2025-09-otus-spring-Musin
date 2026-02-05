@@ -2,7 +2,7 @@
 plugins {
     kotlin("jvm") version "2.2.20"
     kotlin("plugin.spring") version "2.2.20"
-    id("org.springframework.boot") version "3.5.9"
+    id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.github.johnrengelman.shadow")
 }
@@ -25,8 +25,6 @@ dependencies {
 
     implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.21.0")
     implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.21.0")
-
-    runtimeOnly("org.mongodb:mongodb-driver-reactivestreams:4.11.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")

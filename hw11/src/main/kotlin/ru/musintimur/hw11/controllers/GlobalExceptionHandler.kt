@@ -5,9 +5,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
+import ru.musintimur.hw11.dto.ErrorResponse
+import ru.musintimur.hw11.dto.ValidationErrorResponse
 import ru.musintimur.hw11.exceptions.EntityNotFoundException
-import ru.musintimur.hw11.models.ErrorResponse
-import ru.musintimur.hw11.models.ValidationErrorResponse
 
 @RestControllerAdvice
 class GlobalExceptionHandler {

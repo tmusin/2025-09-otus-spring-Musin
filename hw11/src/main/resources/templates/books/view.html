@@ -33,7 +33,18 @@
     <p><strong>Жанр:</strong> <span id="genreName"></span></p>
 
     <h3>Комментарии</h3>
-    <div id="comments"></div>
+    <div id="comments">
+      <table id="commentsTable" style="display: none;">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Текст</th>
+        </tr>
+        </thead>
+        <tbody id="commentsBody"></tbody>
+      </table>
+    </div>
+    <p id="emptyMsg" style="display: none;">К этой книге нет комментариев.</p>
 
     <div style="margin-top: 20px;">
       <a href="" id="editLink" class="btn btn-primary">Редактировать</a>
@@ -54,8 +65,8 @@
           document.getElementById('title').textContent = book.title;
           document.getElementById('bookId').textContent = book.id;
           document.getElementById('bookTitle').textContent = book.title;
-          document.getElementById('authorName').textContent = book.authorFullName;
-          document.getElementById('genreName').textContent = book.genreName;
+          document.getElementById('authorName').textContent = book.author.fullName;
+          document.getElementById('genreName').textContent = book.genre.name;
 
           document.getElementById('editLink').href = `/books/${book.id}/edit`;
           document.getElementById('deleteLink').href = `/books/${book.id}/delete`;
@@ -67,7 +78,55 @@
           document.getElementById('errorMsg').style.display = 'block';
           document.getElementById('loading').style.display = 'none';
       }
+
+      loadComments();
   }
+
+  async function loadComments() {
+        try {
+            const response = await fetch('/api/comments?bookId=' + bookId);
+            if (!response.ok) {
+                throw new Error(`Ошибка сервера: ${response.status}`);
+            }
+            const comments = await response.json();
+            displayComments(comments);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showError('Ошибка при загрузке комментариев: ' + error.message);
+        }
+    }
+
+    function displayComments(comments) {
+        const tbody = document.getElementById('commentsBody');
+        const table = document.getElementById('commentsTable');
+        const emptyMsg = document.getElementById('emptyMsg');
+
+        if (comments.length === 0) {
+            table.style.display = 'none';
+            emptyMsg.style.display = 'block';
+        } else {
+            tbody.innerHTML = comments.map(comment => `
+                <tr>
+                    <td>${escapeHtml(String(comment.id))}</td>
+                    <td>${escapeHtml(comment.text)}</td>
+                </tr>
+            `).join('');
+            emptyMsg.style.display = 'none';
+            table.style.display = 'table';
+        }
+    }
+
+    function showError(message) {
+        const errorMsg = document.getElementById('errorMsg');
+        errorMsg.textContent = message;
+        errorMsg.style.display = 'block';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
   loadBook();
 </script>

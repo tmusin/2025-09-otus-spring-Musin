@@ -1,6 +1,6 @@
 package ru.musintimur.hw11.dto
 
-data class AuthorDto(
+data class CommentDto(
     val id: String? = null,
-    val fullName: String,
+    val text: String,
 )

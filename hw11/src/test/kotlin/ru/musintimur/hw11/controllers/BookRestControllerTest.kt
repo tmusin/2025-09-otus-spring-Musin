@@ -1,6 +1,5 @@
 package ru.musintimur.hw11.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
@@ -12,18 +11,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import ru.musintimur.hw11.dto.AuthorDto
 import ru.musintimur.hw11.dto.BookCreateDto
 import ru.musintimur.hw11.dto.BookDto
 import ru.musintimur.hw11.dto.BookUpdateDto
+import ru.musintimur.hw11.dto.GenreDto
 import ru.musintimur.hw11.services.BookService
 
 @WebFluxTest(BookRestController::class)
 class BookRestControllerTest {
     @Autowired
     private lateinit var webTestClient: WebTestClient
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
 
     @MockitoBean
     private lateinit var bookService: BookService
@@ -36,10 +34,8 @@ class BookRestControllerTest {
             BookDto(
                 id = "1",
                 title = "Test Book",
-                authorId = "1",
-                authorFullName = "Test Author",
-                genreId = "1",
-                genreName = "Test Genre",
+                author = AuthorDto("1", "Test Author"),
+                genre = GenreDto("1", "Test Genre"),
             )
     }
 

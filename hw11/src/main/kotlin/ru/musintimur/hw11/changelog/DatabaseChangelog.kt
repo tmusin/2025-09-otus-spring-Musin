@@ -6,6 +6,7 @@ import io.mongock.api.annotations.RollbackExecution
 import org.springframework.data.mongodb.core.MongoTemplate
 import ru.musintimur.hw11.models.Author
 import ru.musintimur.hw11.models.Book
+import ru.musintimur.hw11.models.Comment
 import ru.musintimur.hw11.models.Genre
 
 @ChangeUnit(id = "initial-data", order = "001", author = "musin")
@@ -28,8 +29,8 @@ class DatabaseChangelog(
                     Book(
                         id = "1",
                         title = "BookTitle_1",
-                        authorId = author1.id.orEmpty(),
-                        genreId = genre1.id.orEmpty(),
+                        author = author1,
+                        genre = genre1,
                     ),
                 )
         val book2 =
@@ -38,8 +39,8 @@ class DatabaseChangelog(
                     Book(
                         id = "2",
                         title = "BookTitle_2",
-                        authorId = author2.id.orEmpty(),
-                        genreId = genre2.id.orEmpty(),
+                        author = author2,
+                        genre = genre2,
                     ),
                 )
         val book3 =
@@ -48,10 +49,14 @@ class DatabaseChangelog(
                     Book(
                         id = "3",
                         title = "BookTitle_3",
-                        authorId = author3.id.orEmpty(),
-                        genreId = genre3.id.orEmpty(),
+                        author = author3,
+                        genre = genre3,
                     ),
                 )
+
+        mongoTemplate.save(Comment(id = "1", text = "Comment_1 for Book_1", book = book1))
+        mongoTemplate.save(Comment(id = "2", text = "Comment_2 for Book_1", book = book1))
+        mongoTemplate.save(Comment(id = "3", text = "Comment_3 for Book_2", book = book2))
     }
 
     @RollbackExecution

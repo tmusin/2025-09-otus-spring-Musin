@@ -121,8 +121,8 @@
 
         document.getElementById('bookId').value = book.id;
         document.getElementById('title').value = book.title;
-        document.getElementById('authorId').value = book.authorId;
-        document.getElementById('genreId').value = book.genreId;
+        document.getElementById('authorId').value = book.author.id;
+        document.getElementById('genreId').value = book.genre.id;
     }
 
     document.getElementById('bookForm').addEventListener('submit', async (e) => {

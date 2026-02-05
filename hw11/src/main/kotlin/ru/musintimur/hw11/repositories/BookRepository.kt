@@ -8,7 +8,7 @@ import ru.musintimur.hw11.models.Book
 
 @Repository
 interface BookRepository : ReactiveMongoRepository<Book, String> {
-    fun findByTitle(title: String): Mono<Book>
-
     override fun findAll(): Flux<Book>
+
+    override fun findById(id: String): Mono<Book>
 }

@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      auto-index-creation: true
+      port: 0
+      database: library
+  test:
+    mockmvc:
+      print: true
