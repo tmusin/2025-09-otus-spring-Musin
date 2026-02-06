@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: hw11-webflux
+  data:
+    mongodb:
+      port: 0
+      database: library
+  webflux:
+    base-path: /
+  main:
+    allow-bean-definition-overriding: true
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 8.0.5
+
+mongock:
+  runner-type: "InitializingBean"
+  migration-scan-package:
+    - ru.musintimur.hw11.changelog
+  change-logs-scan-package:
+    - ru.musintimur.hw11.changelog
+  mongo-db:
+    write-concern:
+      journal: false
+    read-concern: local
+
+logging:
+  level:
+    root: INFO
+    ru.musintimur.hw11: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/app.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 10

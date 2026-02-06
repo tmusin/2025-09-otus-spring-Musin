@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Подтверждение удаления</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .confirm-box { background: #fff3cd; border: 1px solid #ffc107; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .btn { display: inline-block; padding: 10px 20px; margin: 5px 5px 5px 0; text-decoration: none; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-danger { background: #cc0000; color: white; }
+        .btn-secondary { background: #666; color: white; }
+        .btn:hover { opacity: 0.8; }
+        .home-link { margin-bottom: 20px; }
+        .alert { padding: 10px; margin-bottom: 15px; border-radius: 3px; }
+        .alert-danger { background: #ffeeee; border: 1px solid #cc0000; color: #cc0000; display: none; }
+        .loading { display: none; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="home-link"><a href="/">← Главная</a></div>
+    <div class="alert alert-danger" id="errorAlert"></div>
+    <div class="loading" id="loading">Удаление...</div>
+
+    <h1>Подтверждение удаления</h1>
+
+    <div class="confirm-box">
+        <p>Вы уверены, что хотите удалить эту книгу?</p>
+        <p>Это действие необратимо.</p>
+    </div>
+
+    <form id="deleteForm">
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+        <a href="/books" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+
+<script>
+    const pathMatch = window.location.pathname.match(/\/books\/([a-zA-Z0-9]+)\/delete/);
+    const bookId = pathMatch ? pathMatch[1] : null;
+
+    document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!bookId) {
+            showError('ID книги не найден');
+            return;
+        }
+
+        showLoading(true);
+        clearError();
+
+        try {
+            const response = await fetch(`/api/books/${bookId}`, { method: 'DELETE' });
+            if (!response.ok) {
+                throw new Error(`Ошибка при удалении: ${response.status}`);
+            }
+
+            window.location.href = '/books';
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showError('Ошибка при удалении: ' + error.message);
+            showLoading(false);
+        }
+    });
+
+    function showError(message) {
+        const alert = document.getElementById('errorAlert');
+        alert.textContent = message;
+        alert.style.display = 'block';
+    }
+
+    function clearError() {
+        const alert = document.getElementById('errorAlert');
+        alert.style.display = 'none';
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+</script>
+</body>
+</html>
