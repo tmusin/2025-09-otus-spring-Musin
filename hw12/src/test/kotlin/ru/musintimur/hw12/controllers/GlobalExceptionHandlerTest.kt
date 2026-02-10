@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -23,7 +22,6 @@ import ru.musintimur.hw12.exceptions.EntityNotFoundException
 import ru.musintimur.hw12.services.BookService
 
 @WebMvcTest(BookRestController::class)
-@AutoConfigureMockMvc
 class GlobalExceptionHandlerTest {
     @Autowired
     private lateinit var webApplicationContext: WebApplicationContext
