@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Библиотека - Главная</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { color: #333; margin: 0; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-name { color: #666; font-weight: bold; }
+        nav { background: #f0f0f0; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        nav a { display: inline-block; margin: 5px 10px 5px 0; padding: 10px 15px; background: #0066cc; color: white; text-decoration: none; border-radius: 3px; }
+        nav a:hover { background: #0052a3; }
+        .logout-form { margin: 0; }
+        .logout-btn { padding: 10px 15px; background: #d9534f; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .logout-btn:hover { background: #c9302c; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Библиотека</h1>
+        <div class="user-info">
+            <span class="user-name" sec:authentication="name">Пользователь</span>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="logout-btn">Выход</button>
+            </form>
+        </div>
+    </div>
+    <nav>
+        <a href="/books">Все книги</a>
+        <a href="/books/create">Добавить книгу</a>
+        <a href="/authors">Авторы</a>
+        <a href="/genres">Жанры</a>
+    </nav>
+</div>
+</body>
+</html>

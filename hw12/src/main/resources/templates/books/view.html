@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Просмотр книги</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .book-info { margin: 20px 0; }
+    .book-info p { margin: 10px 0; }
+    .btn { display: inline-block; padding: 8px 12px; margin: 2px; text-decoration: none; border-radius: 3px; border: none; cursor: pointer; }
+    .btn-primary { background: #0066cc; color: white; }
+    .btn-danger { background: #cc0000; color: white; }
+    .btn-primary:hover { background: #0052a3; }
+    .btn-danger:hover { background: #990000; }
+    .home-link { margin-bottom: 20px; }
+    .loading { text-align: center; color: #666; }
+    .error { color: #cc0000; padding: 10px; background: #ffeeee; border: 1px solid #cc0000; border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="home-link"><a href="/books">← Назад к списку книг</a></div>
+  <h1 id="title">Загрузка...</h1>
+
+  <div class="error" id="errorMsg" style="display: none;"></div>
+  <div class="loading" id="loading">Загрузка...</div>
+
+  <div class="book-info" id="bookInfo" style="display: none;">
+    <p><strong>ID:</strong> <span id="bookId"></span></p>
+    <p><strong>Название:</strong> <span id="bookTitle"></span></p>
+    <p><strong>Автор:</strong> <span id="authorName"></span></p>
+    <p><strong>Жанр:</strong> <span id="genreName"></span></p>
+
+    <h3>Комментарии</h3>
+    <div id="comments">
+      <table id="commentsTable" style="display: none;">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Текст</th>
+        </tr>
+        </thead>
+        <tbody id="commentsBody"></tbody>
+      </table>
+    </div>
+    <p id="emptyMsg" style="display: none;">К этой книге нет комментариев.</p>
+
+    <div style="margin-top: 20px;">
+      <a href="" id="editLink" class="btn btn-primary">Редактировать</a>
+      <a href="" id="deleteLink" class="btn btn-danger">Удалить</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const bookId = window.location.pathname.split('/')[2];
+
+  async function loadBook() {
+      try {
+          const response = await fetch(`/api/books/${bookId}`);
+          if (!response.ok) throw new Error('Книга не найдена');
+          const book = await response.json();
+
+          document.getElementById('title').textContent = book.title;
+          document.getElementById('bookId').textContent = book.id;
+          document.getElementById('bookTitle').textContent = book.title;
+          document.getElementById('authorName').textContent = book.authorFullName;
+          document.getElementById('genreName').textContent = book.genreName;
+
+          document.getElementById('editLink').href = `/books/${book.id}/edit`;
+          document.getElementById('deleteLink').href = `/books/${book.id}/delete`;
+
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('bookInfo').style.display = 'block';
+      } catch (error) {
+          document.getElementById('errorMsg').textContent = error.message;
+          document.getElementById('errorMsg').style.display = 'block';
+          document.getElementById('loading').style.display = 'none';
+      }
+
+      loadComments();
+  }
+
+  async function loadComments() {
+        try {
+            const response = await fetch('/api/comments?bookId=' + bookId);
+            if (!response.ok) {
+                throw new Error(`Ошибка сервера: ${response.status}`);
+            }
+            const comments = await response.json();
+            displayComments(comments);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showError('Ошибка при загрузке комментариев: ' + error.message);
+        }
+    }
+
+    function displayComments(comments) {
+        const tbody = document.getElementById('commentsBody');
+        const table = document.getElementById('commentsTable');
+        const emptyMsg = document.getElementById('emptyMsg');
+
+        if (comments.length === 0) {
+            table.style.display = 'none';
+            emptyMsg.style.display = 'block';
+        } else {
+            tbody.innerHTML = comments.map(comment => `
+                <tr>
+                    <td>${escapeHtml(String(comment.id))}</td>
+                    <td>${escapeHtml(comment.text)}</td>
+                </tr>
+            `).join('');
+            emptyMsg.style.display = 'none';
+            table.style.display = 'table';
+        }
+    }
+
+    function showError(message) {
+        const errorMsg = document.getElementById('errorMsg');
+        errorMsg.textContent = message;
+        errorMsg.style.display = 'block';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+  loadBook();
+</script>
+</body>
+</html>

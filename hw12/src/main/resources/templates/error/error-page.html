@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${errorCode} + ' - ' + ${errorTitle}">Ошибка</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .error-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .error-code {
+        font-size: 72px;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 10px;
+        line-height: 1;
+    }
+
+    .error-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .error-message {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+
+    .error-icons {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+
+    .error-404 .error-icons::before {
+        content: '😕';
+    }
+
+    .error-500 .error-icons::before {
+        content: '⚠️';
+    }
+
+    .button-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+    }
+
+    .error-footer {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        font-size: 12px;
+        color: #999;
+    }
+  </style>
+</head>
+<body>
+<div class="error-container" th:classappend="'error-' + ${errorCode}">
+  <div class="error-icons"></div>
+
+  <div class="error-code" th:text="${errorCode}"></div>
+  <div class="error-title" th:text="${errorTitle}"></div>
+  <div class="error-message" th:text="${errorMessage}"></div>
+
+  <div class="button-group">
+    <a href="/books" class="btn btn-primary">Список книг</a>
+    <a href="/" class="btn btn-secondary">На главную</a>
+  </div>
+
+  <div class="error-footer">
+    <p>Если проблема повторяется, свяжитесь с администратором</p>
+  </div>
+</div>
+</body>
+</html>
