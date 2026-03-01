@@ -8,7 +8,6 @@ import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.MutableAclService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import ru.musintimur.hw13.models.Book
 import ru.musintimur.hw13.models.Comment
 import ru.musintimur.hw13.models.User
