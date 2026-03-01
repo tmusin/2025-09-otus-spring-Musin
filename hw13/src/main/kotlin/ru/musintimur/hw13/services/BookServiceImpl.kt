@@ -1,0 +1,98 @@
+package ru.musintimur.hw13.services
+
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import ru.musintimur.hw13.dto.BookCreateDto
+import ru.musintimur.hw13.dto.BookDto
+import ru.musintimur.hw13.dto.BookUpdateDto
+import ru.musintimur.hw13.exceptions.EntityNotFoundException
+import ru.musintimur.hw13.models.Book
+import ru.musintimur.hw13.models.User
+import ru.musintimur.hw13.repositories.AuthorRepository
+import ru.musintimur.hw13.repositories.BookRepository
+import ru.musintimur.hw13.repositories.CommentRepository
+import ru.musintimur.hw13.repositories.GenreRepository
+import ru.musintimur.hw13.utils.toDto
+
+@Service
+open class BookServiceImpl(
+    private val bookRepository: BookRepository,
+    private val authorRepository: AuthorRepository,
+    private val genreRepository: GenreRepository,
+    private val commentRepository: CommentRepository,
+    private val aclService: AclService,
+) : BookService {
+    @Transactional(readOnly = true)
+    override fun findById(id: Long): BookDto {
+        val book =
+            bookRepository
+                .findById(id)
+                .orElseThrow {
+                    EntityNotFoundException("Book with id $id not found")
+                }
+        return book.toDto()
+    }
+
+    @Transactional(readOnly = true)
+    override fun findAll(): List<BookDto> = bookRepository.findAll().map { it.toDto() }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
+    override fun insert(dto: BookCreateDto): BookDto {
+        val author =
+            authorRepository
+                .findById(dto.authorId ?: 0)
+                .orElseThrow { EntityNotFoundException("Author with id ${dto.authorId} not found") }
+        val genre =
+            genreRepository
+                .findById(dto.genreId ?: 0)
+                .orElseThrow { EntityNotFoundException("Genre with id ${dto.genreId} not found") }
+
+        val book = Book(title = dto.title, author = author, genre = genre)
+        val savedBook = bookRepository.save(book)
+
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication?.authorities?.any { it.authority == "ROLE_EDITOR" } == true) {
+            val user = authentication.principal as? User
+            if (user != null) {
+                aclService.grantOwnerPermissions(savedBook, user)
+            }
+        }
+
+        return savedBook.toDto()
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN') or @aclService.hasPermission(#dto.id, 'ru.musintimur.hw13.models.Book', 'WRITE')")
+    override fun update(dto: BookUpdateDto): BookDto {
+        val book =
+            bookRepository
+                .findById(dto.id)
+                .orElseThrow { EntityNotFoundException("Book with id ${dto.id} not found") }
+
+        val author =
+            authorRepository
+                .findById(dto.authorId ?: 0)
+                .orElseThrow { EntityNotFoundException("Author with id ${dto.authorId} not found") }
+        val genre =
+            genreRepository
+                .findById(dto.genreId ?: 0)
+                .orElseThrow { EntityNotFoundException("Genre with id ${dto.genreId} not found") }
+
+        book.title = dto.title
+        book.author = author
+        book.genre = genre
+
+        val updatedBook = bookRepository.save(book)
+        return updatedBook.toDto()
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN') or @aclService.hasPermission(#id, 'ru.musintimur.hw13.models.Book', 'DELETE')")
+    override fun deleteById(id: Long) {
+        commentRepository.deleteAllByBookId(id)
+        bookRepository.deleteById(id)
+    }
+}
