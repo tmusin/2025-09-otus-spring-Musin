@@ -63,8 +63,7 @@ class BookControllerSecurityTest {
                 post("/api/books")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""{"title":"New Book","authorId":1,"genreId":1}"""),
-            ).andExpect(status().is5xxServerError)
-            .andExpect(content().string("{\"message\":\"Access Denied\",\"status\":500}"))
+            ).andExpect(status().isForbidden)
     }
 
     @Test
@@ -119,7 +118,6 @@ class BookControllerSecurityTest {
     fun testUserCannotDeleteBook() {
         mockMvc
             .perform(delete("/api/books/1"))
-            .andExpect(status().is5xxServerError)
-            .andExpect(content().string("{\"message\":\"Access Denied\",\"status\":500}"))
+            .andExpect(status().isForbidden)
     }
 }

@@ -39,7 +39,6 @@ open class BookServiceImpl(
     override fun findAll(): List<BookDto> = bookRepository.findAll().map { it.toDto() }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')")
     override fun insert(dto: BookCreateDto): BookDto {
         val author =
             authorRepository

@@ -2,6 +2,7 @@ package ru.musintimur.hw13.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
 import org.springframework.security.acls.AclPermissionEvaluator
@@ -28,8 +29,26 @@ open class SecurityConfig {
                 authz
                     .requestMatchers("/login", "/", "/css/**", "/js/**")
                     .permitAll()
-                    .requestMatchers("/books/**", "/authors/**", "/genres/**", "/comments/**")
-                    .hasAnyRole("ADMIN", "EDITOR", "USER")
+                    .requestMatchers(HttpMethod.GET, "/books", "/books/*")
+                    .authenticated()
+                    .requestMatchers("/books/create", "/books/*/edit", "/books/*/delete")
+                    .hasAnyRole("ADMIN", "EDITOR")
+                    .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/*")
+                    .authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/books")
+                    .hasAnyRole("ADMIN", "EDITOR")
+                    .requestMatchers(HttpMethod.PUT, "/api/books/*")
+                    .hasAnyRole("ADMIN", "EDITOR")
+                    .requestMatchers(HttpMethod.DELETE, "/api/books/*")
+                    .hasAnyRole("ADMIN", "EDITOR")
+                    .requestMatchers(HttpMethod.GET, "/api/comments/**")
+                    .authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/comments")
+                    .authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/comments/*")
+                    .authenticated()
+                    .requestMatchers("/authors/**", "/genres/**", "/api/authors/**", "/api/genres/**")
+                    .authenticated()
                     .anyRequest()
                     .authenticated()
             }.formLogin {

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.test.context.support.WithMockUser
 import ru.musintimur.hw13.support.WithRealUser
 
 @SpringBootTest
@@ -12,7 +13,7 @@ class AclServiceSecurityTest {
     private lateinit var aclService: AclService
 
     @Test
-    @WithRealUser(username = "admin")
+    @WithMockUser(roles = ["ADMIN"])
     fun testAdminHasAllPermissionsOnExistingBook() {
         val hasReadPermission = aclService.hasPermission(1, "ru.musintimur.hw13.models.Book", "READ")
         val hasWritePermission = aclService.hasPermission(1, "ru.musintimur.hw13.models.Book", "WRITE")
@@ -24,7 +25,7 @@ class AclServiceSecurityTest {
     }
 
     @Test
-    @WithRealUser(username = "editor1")
+    @WithRealUser(username = "editor1", roles = ["EDITOR"])
     fun testEditorCanAccessOwnBook() {
         val hasReadPermission = aclService.hasPermission(1, "ru.musintimur.hw13.models.Book", "READ")
         val hasWritePermission = aclService.hasPermission(1, "ru.musintimur.hw13.models.Book", "WRITE")

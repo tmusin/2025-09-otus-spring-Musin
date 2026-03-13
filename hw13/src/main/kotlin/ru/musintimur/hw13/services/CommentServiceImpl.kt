@@ -25,7 +25,6 @@ open class CommentServiceImpl(
             .map { CommentDto(it.id, it.text, bookId, it.user?.username.orEmpty()) }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'EDITOR', 'USER')")
     override fun save(dto: CommentCreateDto): CommentDto {
         val authentication = SecurityContextHolder.getContext().authentication
         val user = authentication?.principal as? User ?: throw IllegalArgumentException("User not found")
